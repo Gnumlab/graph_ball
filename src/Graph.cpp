@@ -529,7 +529,7 @@ void Graph::compute_gamma(int start, int end = -1){
   
   
   
-    fprintf(stderr, "king gamma %d - %d (size %d, %d)\n", max_gamma, over_threshold, n, m);
+    fprintf(stderr, "Graph's gamma is %d - vertices above the fixed threshold are %d (size n=%d, m=%d)\n", max_gamma, over_threshold, n, m);
 
 }
 
