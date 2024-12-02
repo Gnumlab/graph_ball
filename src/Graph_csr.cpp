@@ -58,6 +58,12 @@ void Graph_csr::init(int N, int M) {
         o_red_degree[i] = 0;
         i_red_degree[i] = 0;
     }
+    
+    
+    sketches = NULL; //TODO: add actual sketch implementation
+    
+    
+    
 
     
     queue = buffer + (3 * N + 2 * M);
@@ -496,6 +502,58 @@ void Graph_csr::compute_gamma(int start, int end = -1){
 }
 
 
+
+
+void Graph_csr::propagate(int u){
+/* Propagate u's ball to all its neighbours. For eah v in N(u), B(u) = B(u) U B(v) and B(v) = B(v) U B(u)
+@param u: vertex whose ball need to be merge with its neighbours.
+*/
+
+
+   for (int i = o_First[u]; i < o_degree[u]; i++){
+     //Do merge
+   
+   }
+}
+
+
+void Graph_csr::update(int u, int v){
+/* update the sketches after vertex (u, v) was inserted. The function suppose the edge (u, v) is already stored in the graph data structure
+The funtion is unidirectional: it updates only the ball of u and executed the propagation algorithm from u's point of view
+The implemented algorithm is the most general scheme with random sample and threshold propagation
+@param u: first edge endpoint
+@param v: second edge endpoint
+*/
+
+
+// Update ball of u and ball of v
+
+  // merge(sketches[u], sketches[v]);
+
+  o_red_degree[u]++;
+  i_red_degree[u]++;
+  
+  // Check the threshold and to the whole propagation
+  if(o_red_degree[u] >= (o_degree[u] - o_red_degree[u]) * epsilon){
+    // reset the number of red edges
+    o_red_degree[u] = 0;
+    i_red_degree[u] = 0;
+      
+    // propagate to all neighbours of u
+    this->propagate(u);
+    return; // all the neighbours are now updated
+  }
+  
+  // Sample k neighbours at random. The sample is with replacement and done with stupid random function!
+  for (int i = 0; i < k; i++){
+    int v = rand() % o_degree[u];
+    // merge(sketches[u], sketches[v]);
+    // merge(sketches[v], sketches[u]);
+  
+  }
+  
+
+}
 
 
 

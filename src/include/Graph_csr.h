@@ -26,6 +26,9 @@ private:
     int *i_degree;     // current in-degree for each vertex v
     int *i_red_degree; // current red in-degree for each vertex v. Red degree is defined as the number of edges not propagated to all v's neighbours
     
+
+    void *sketches; //TODO: add actual sketch implementation
+    int epsilon, gamma, k;
     
 
     int *queue;
@@ -44,6 +47,7 @@ private:
     //METHODS
     void processInput(int *input);      //insert all the edges stored in input
 
+    void propagate(int u);
 
 
 
@@ -87,6 +91,9 @@ public:
 
 
     void generate(std::string filename, int direction);
+    
+    
+    void update(int u, int v);
 };
 
 
