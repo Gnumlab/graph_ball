@@ -34,3 +34,7 @@
 # Folders
 data/
 build/
+
+*.old
+
+.vscode/

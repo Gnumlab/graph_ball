@@ -5,8 +5,10 @@
 #ifndef DECREMENTALSCC_UTILS_H
 #define DECREMENTALSCC_UTILS_H
 
-int* read_Graph(const char *file, int *n, int *m);
-int* read_Graph(std::string filename, int *n, int *m, int direction);
+#include <string>
+
+// int* read_Graph(const char *file, int *n, int *m);
+int* read_Graph(std::string filename, int *n, int *m, bool isDirected);
 
 int *ErdosReniyGraph(int size, double prob, int seed, int *number_edges);
 int compare_scc(int *scc0, int *scc1, int n);
