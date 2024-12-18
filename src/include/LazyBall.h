@@ -12,7 +12,7 @@ private:
 public:
     LazyBall();
     void insert(int v);
-    void push(Ball *B);
+    void push(LazyBall *B);
     int size();
 };
 

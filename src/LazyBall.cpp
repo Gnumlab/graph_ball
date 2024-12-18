@@ -12,10 +12,10 @@ void LazyBall::insert(int v)
     this->ball2.insert(v);
 }
 
-void LazyBall::push(Ball *B)
+void LazyBall::push(LazyBall *B)
 {
-    LazyBall *ball = dynamic_cast<LazyBall *>(B);
-    for (int v : ball->ball1)
+    // LazyBall *ball = dynamic_cast<LazyBall *>(B);
+    for (int v : B->ball1)
         this->ball2.insert(v);
 }
 

@@ -12,10 +12,10 @@ void ExactBall::insert(int v)
     this->last_insert_element = v;
 }
 
-void ExactBall::push(Ball *B)
+void ExactBall::push(ExactBall *B)
 {
-    ExactBall *ball = dynamic_cast<ExactBall *>(B);
-    this->ball.insert(ball->last_insert_element);
+    // ExactBall *ball = dynamic_cast<ExactBall *>(B);
+    this->ball.insert(B->last_insert_element);
     // for (int v : ball->ball)
     //     this->ball.insert(v);
 }

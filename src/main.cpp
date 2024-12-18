@@ -7,18 +7,27 @@
 #include <iostream>
 #include "include/ExactBall.h"
 #include "include/LazyBall.h"
+#include "include/Utils.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
 
-  Graph_csr<LazyBall>(10, 10);
-  exit(0);
-  Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file("soc-LiveJournal1.txt", true);
-  G->update(1, 2);
-  G->update(2, 3);
+  // Graph_csr<LazyBall>(10, 10);
+  // exit(0);
+  Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file("test-graph-1.graph", false);
+  G->setThreshold(1.0);
+  int n, m;
+  int *edges = read_Graph("test-graph-1.graph", &n, &m, true);
 
+  for (int i = 0; i < 2 * m - 12; i += 2)
+  {
+    G->update(edges[i], edges[i + 1]);
+  }
+
+  G->print_graph();
+  exit(0);
   for (int i = 0; i < G->getN(); i++)
   {
     std::cout << i << " " << G->balls[i].size() << std::endl;

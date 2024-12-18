@@ -7,6 +7,8 @@
 
 #include "include/Utils.h"
 #include "include/Graph_csr.h"
+#include "include/MinHashBall.h"
+#include "Hash.cpp"
 
 template <class T>
 Graph_csr<T>::~Graph_csr()
@@ -57,8 +59,6 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
     this->k = k;
     this->phi = phi;
 
-    std::cout << directed << " " << k << " " << phi << std::endl;
-
     this->o_First = new int[N];
     this->o_Target = new int[M];
     this->o_degree = new int[N];
@@ -92,6 +92,16 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
     this->visited = new int[N];
 
     this->bfs_timestamp = 0;
+}
+
+template <class MinHashBall>
+Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+    : Graph_csr(N, M, isDirected, k, phi)
+{
+    for (int i = 0; i < this->n; i++)
+    {
+        this->balls[i] = MinHashBall(hash_functions, n_hashes);
+    }
 }
 
 template <class T>
@@ -158,7 +168,10 @@ void Graph_csr<T>::setN(int n)
 template <class T>
 int Graph_csr<T>::getM() const
 {
-    return this->m;
+    if (this->directed)
+        return this->m;
+    else
+        return this->m / 2;
 }
 
 template <class T>
@@ -200,22 +213,37 @@ bool Graph_csr<T>::check_edge(int u, int v)
 }
 
 template <class T>
-Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, int isDirected)
+Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi)
 {
-    std::cerr << "Reading graph " << filename << "\n";
     int n, m;
     int *edges = read_Graph(filename, &n, &m, isDirected);
     return Graph_csr::from_edges(edges, n, m, isDirected);
 }
 
+// template <class MinHashBall>
+// Graph_csr<MinHashBall> *Graph_csr<MinHashBall>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+// {
+//     int n, m;
+//     int *edges = read_Graph(filename, &n, &m, isDirected);
+//     return Graph_csr<MinHashBall>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
+// }
+
 template <class T>
-Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected)
+Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi)
 {
-    Graph_csr *graph = new Graph_csr(n, m, isDirected); // init;
+    Graph_csr *graph = new Graph_csr(n, m, isDirected, k, phi); // init;
     graph->process_edges(edges);                        // insert edges
-    // graph.create(edges, n, m, isDirected);
     return graph;
 }
+
+// template <class MinHashBall>
+// Graph_csr<MinHashBall> *Graph_csr<MinHashBall>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+// {
+//     Graph_csr<MinHashBall> *graph = new Graph_csr<MinHashBall>(n, m, isDirected, k, phi, n_hashes, hash_functions); // init;
+//     graph->process_edges(edges);                        // insert edges
+//     // graph.create(edges, n, m, isDirected);
+//     return graph;
+// }
 
 template <class T>
 int Graph_csr<T>::bfs_2(int u)
@@ -260,6 +288,12 @@ void Graph_csr<T>::propagate(int u)
         int v = this->o_Target[i];
         this->balls[v].push(&this->balls[u]);
     }
+}
+
+template <class T>
+void Graph_csr<T>::setThreshold(float phi)
+{
+    this->phi = phi;
 }
 
 template <class T>
@@ -315,4 +349,30 @@ void Graph_csr<T>::update(int u, int v)
             }
         }
     }
+}
+
+template <class T>
+void Graph_csr<T>::print_graph()
+{
+    printf("nv=%d, ne=%d, direct=%d, phi=%.3f, k=%d\n", this->n, this->getM(), this->directed, this->phi, this->k);
+    for (int i = 0; i < this->n; i++)
+    {
+        int start = this->o_First[i];
+        int degree = this->o_degree[i];
+        int red_degree = this->o_red_degree[i];
+        int end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
+        printf("[%d, d=%d, \033[31mrd=%d\033[0m]:\t", i, degree, red_degree);
+
+        for (int j = start; j < end; j++)
+        {
+            if (j < start + degree - red_degree)
+                printf("\033[37m%d\033[0m ", this->o_Target[j]);
+            else if (j < start + degree)
+                printf("\033[31m%d\033[0m ", this->o_Target[j]);
+            else
+                printf("\033[38;5;254;48;5;245m%d \033[0m", this->o_Target[j]);
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }

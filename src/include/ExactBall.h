@@ -12,7 +12,7 @@ private:
 public:
     ExactBall();
     void insert(int v);
-    void push(Ball *B);
+    void push(ExactBall *B);
     int size();
 };
 

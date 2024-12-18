@@ -6,6 +6,7 @@
 #define DECREMENTALSCC_GRAPH_CSR_H
 
 #include <string>
+#include "../Hash.cpp"
 
 #define NIL -1
 template <class T>
@@ -44,6 +45,7 @@ public:
     ~Graph_csr();
 
     Graph_csr(int N, int M, bool isDirected = false, int k = 0, float phi = 0.0); // constructor
+    Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions);
 
     void insert_edge(int u, int v); // insert edge from u to v
 
@@ -59,10 +61,18 @@ public:
 
     void setM(int m);
 
-    static Graph_csr<T> *from_file(std::string filename, int direction);
-    static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected);
+    void setThreshold(float phi);
+
+    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0);
+    static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0);
+    // static Graph_csr<MinHashBall> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
+    // static Graph_csr<MinHashBall> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
+
+
 
     void update(int u, int v);
+
+    void print_graph();
 };
 
 #endif // DECREMENTALSCC_GRAPH_CSR_H
