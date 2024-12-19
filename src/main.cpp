@@ -7,16 +7,14 @@
 #include <iostream>
 #include "include/ExactBall.h"
 #include "include/LazyBall.h"
+#include "include/MinHashBall.h"
 #include "include/Utils.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-
-  // Graph_csr<LazyBall>(10, 10);
-  // exit(0);
-  Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file("test-graph-1.graph", false);
+  Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file("test-graph-1.graph", false);
   G->setThreshold(1.0);
   int n, m;
   int *edges = read_Graph("test-graph-1.graph", &n, &m, true);

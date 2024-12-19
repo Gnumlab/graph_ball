@@ -31,28 +31,10 @@ Graph_csr<T>::~Graph_csr()
     delete[] balls;
 }
 
-// void Graph_csr<class T>::create(int *edges, int n, int m, bool isDirected = false)
-// {
-//     /** create a graph from file previously read. Initialize all the data structures and attributes.
-//      * @param edges array with all the edges. Starting from 0, an edge is stored (u, v) is stored in position i and i+1
-//      * @param n number of vertices: note that vertices are numbers from 1 to n
-//      * @param m number of edges
-//      */
-
-//     this->init(n, m, isDirected);
-//     this->process_edges(edges);
-// }
-
 // constructor
 template <class T>
 Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
 {
-    /** initialize all the attributes and allocate the space for storing the graph
-     * @param N number of vertices
-     * @param M number of edges
-     * @param isDirected true if the graph is directed, false otherwise
-     */
-
     this->n = N;
     this->m = M;
     this->directed = isDirected;
@@ -107,10 +89,6 @@ Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float ph
 template <class T>
 void Graph_csr<T>::process_edges(int *edges)
 {
-    /** Insert all the edges stored in input. The data structures are supposed initialize.
-     * @param edges array with all the edges. Starting from 0, an edge is stored (u, v) is stored in position i and i+1
-     */
-
     int *max_indegree = new int[n];  // maximum in degree for each vertex; used to initialize i_First
     int *max_outdegree = new int[n]; // maximum out degree for each vertex; used to initialize o_First
 
@@ -183,8 +161,6 @@ void Graph_csr<T>::setM(int m)
 template <class T>
 void Graph_csr<T>::insert_edge(int u, int v)
 {
-    /** insert edge (u, v) */
-
     // store (u, v) as out edge
     this->o_Target[this->o_First[u] + this->o_degree[u]] = v;
     this->o_degree[u]++;
@@ -212,38 +188,43 @@ bool Graph_csr<T>::check_edge(int u, int v)
     return false;
 }
 
+// implemntation for any class T that is not MinHashBall
 template <class T>
+template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi)
 {
     int n, m;
     int *edges = read_Graph(filename, &n, &m, isDirected);
-    return Graph_csr::from_edges(edges, n, m, isDirected);
+    return Graph_csr<T>::from_edges(edges, n, m, isDirected);
 }
 
-// template <class MinHashBall>
-// Graph_csr<MinHashBall> *Graph_csr<MinHashBall>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
-// {
-//     int n, m;
-//     int *edges = read_Graph(filename, &n, &m, isDirected);
-//     return Graph_csr<MinHashBall>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
-// }
-
 template <class T>
+template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi)
 {
-    Graph_csr *graph = new Graph_csr(n, m, isDirected, k, phi); // init;
-    graph->process_edges(edges);                        // insert edges
+    Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi);
+    graph->process_edges(edges);
     return graph;
 }
 
-// template <class MinHashBall>
-// Graph_csr<MinHashBall> *Graph_csr<MinHashBall>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
-// {
-//     Graph_csr<MinHashBall> *graph = new Graph_csr<MinHashBall>(n, m, isDirected, k, phi, n_hashes, hash_functions); // init;
-//     graph->process_edges(edges);                        // insert edges
-//     // graph.create(edges, n, m, isDirected);
-//     return graph;
-// }
+// implemntation for MinHashBall
+template <class T>
+template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
+Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+{
+    int n, m;
+    int *edges = read_Graph(filename, &n, &m, isDirected);
+    return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
+}
+
+template <class T>
+template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
+Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+{
+    Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, n_hashes, hash_functions);
+    graph->process_edges(edges);
+    return graph;
+}
 
 template <class T>
 int Graph_csr<T>::bfs_2(int u)
@@ -279,10 +260,6 @@ int Graph_csr<T>::bfs_2(int u)
 template <class T>
 void Graph_csr<T>::propagate(int u)
 {
-    /* Propagate u's ball to all its neighbours. For eah v in N(u), B(u) = B(u) U B(v) and B(v) = B(v) U B(u)
-    @param u: vertex whose ball need to be merge with its neighbours.
-    */
-
     for (int i = this->o_First[u]; i < this->o_degree[u]; i++)
     {
         int v = this->o_Target[i];
@@ -299,14 +276,6 @@ void Graph_csr<T>::setThreshold(float phi)
 template <class T>
 void Graph_csr<T>::update(int u, int v)
 {
-    /* update the sketches after vertex (u, v) was inserted. The function suppose the edge (u, v) is already stored in the graph data structure
-    The funtion is unidirectional: it updates only the ball of u and executed the propagation algorithm from u's point of view
-    The implemented algorithm is the most general scheme with random sample and threshold propagation
-    @param u: first edge endpoint
-    @param v: second edge endpoint
-    */
-
-    // Update ball of u and ball of v
     this->o_red_degree[u]++;
     this->o_degree[u]++;
     this->balls[u].insert(v);

@@ -7,8 +7,8 @@
 
 #include <string>
 #include "../Hash.cpp"
+#include "MinHashBall.h"
 
-#define NIL -1
 template <class T>
 class Graph_csr
 {
@@ -63,12 +63,17 @@ public:
 
     void setThreshold(float phi);
 
+    template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0);
+
+    template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0);
-    // static Graph_csr<MinHashBall> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
-    // static Graph_csr<MinHashBall> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
 
+    template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
+    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
 
+    template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
+    static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
 
     void update(int u, int v);
 
