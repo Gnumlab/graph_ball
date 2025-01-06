@@ -83,7 +83,8 @@ public:
                 table[i][j] = uint_dist(rng);
     }
 
-    TabulationHash() {
+    TabulationHash()
+    {
         new (this) TabulationHash(UINT32_MAX);
     }
 
@@ -127,6 +128,41 @@ public:
 template <class T>
 class PairWiseHash : public Hash<T>
 {
+};
+
+template <>
+class PairWiseHash<int> : public Hash<int>
+{
+private:
+    int a;
+    int b;
+    uint64_t M = 1844674407371ull;
+    int n;
+
+public:
+    PairWiseHash()
+    {
+        new (this) PairWiseHash(INT32_MAX);
+    }
+
+    PairWiseHash(int n) : n(n)
+    {
+        // RNG rng(1);
+        std::random_device rd;                                   // Obtain a random seed from the hardware
+        RNG rng(rd());                                           // Create a generator instance with the seed
+        std::uniform_int_distribution<int> int_dist_n(0, n - 1); //  range [0, n]
+        this->a = int_dist_n(rng);
+        if (!this->a)
+            this->a++; // set a as non-zero value
+        this->b = int_dist_n(rng);
+    }
+
+    ~PairWiseHash() {}
+
+    int operator()(int x)
+    {
+        return ((a * x + b) % M) % n;
+    }
 };
 
 template <>

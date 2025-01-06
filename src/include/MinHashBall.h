@@ -19,6 +19,7 @@ public:
     void push(MinHashBall *B);
     int size();
     static float similarity(MinHashBall *B1, MinHashBall *B2);
+    void print();
 };
 
 #endif

@@ -78,7 +78,7 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
 
 template <class MinHashBall>
 Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
-    : Graph_csr(N, M, isDirected, k, phi)
+    : Graph_csr<MinHashBall>(N, M, isDirected, k, phi)
 {
     for (int i = 0; i < this->n; i++)
     {
@@ -195,7 +195,7 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 {
     int n, m;
     int *edges = read_Graph(filename, &n, &m, isDirected);
-    return Graph_csr<T>::from_edges(edges, n, m, isDirected);
+    return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi);
 }
 
 template <class T>
@@ -234,7 +234,6 @@ int Graph_csr<T>::bfs_2(int u)
     bfs_timestamp++;
 
     visited[u] = bfs_timestamp;
-    printf("%d ", u);
 
     for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
         visited[o_Target[i]] = bfs_timestamp;
@@ -257,10 +256,15 @@ int Graph_csr<T>::bfs_2(int u)
     return size;
 }
 
+/**
+ * This method is used to propagate the vertices of the ball of radius 1 of the given vertex u to the ball of radius 2 of all its neighbours.
+ * @param u: vertex whose ball of radius 1 is to be propagated to the ball of radius 2 of all its neighbours.
+ * @return: void
+ */
 template <class T>
 void Graph_csr<T>::propagate(int u)
 {
-    for (int i = this->o_First[u]; i < this->o_degree[u]; i++)
+    for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
     {
         int v = this->o_Target[i];
         this->balls[v].push(&this->balls[u]);
@@ -276,14 +280,25 @@ void Graph_csr<T>::setThreshold(float phi)
 template <class T>
 void Graph_csr<T>::update(int u, int v)
 {
+    // increment the red degree of u
     this->o_red_degree[u]++;
+
+    // increment the degree of u
     this->o_degree[u]++;
+
+    // insert v into the ball of u
     this->balls[u].insert(v);
 
+    // push the ball of radius 1 of v to the ball of radius 2 of u
+    this->balls[u].push(&this->balls[v]);
+
+    // check if the red degree of u is greater than the threshold
     float threshold = this->phi * (this->o_degree[u] - this->o_red_degree[u]);
     if (this->o_red_degree[u] >= threshold)
     {
+        // reset the red degree of u
         this->o_red_degree[u] = 0;
+        // propagate the verites of u's ball of radius 1 to the ball of radius 2 of all its neighbours
         this->propagate(u);
     }
     else
@@ -301,6 +316,7 @@ void Graph_csr<T>::update(int u, int v)
         this->o_red_degree[v]++;
         this->o_degree[v]++;
         this->balls[v].insert(u);
+        this->balls[v].push(&this->balls[u]);
 
         threshold = this->phi * (this->o_degree[v] - this->o_red_degree[v]);
         if (this->o_red_degree[v] >= threshold)
@@ -321,7 +337,7 @@ void Graph_csr<T>::update(int u, int v)
 }
 
 template <class T>
-void Graph_csr<T>::print_graph()
+void Graph_csr<T>::print_graph(bool doPrintBall)
 {
     printf("nv=%d, ne=%d, direct=%d, phi=%.3f, k=%d\n", this->n, this->getM(), this->directed, this->phi, this->k);
     for (int i = 0; i < this->n; i++)
@@ -344,4 +360,15 @@ void Graph_csr<T>::print_graph()
         std::cout << std::endl;
     }
     std::cout << std::endl;
+
+    if (doPrintBall)
+    {
+        std::cout << "Balls:" << std::endl;
+        for (int i = 0; i < this->n; i++)
+        {
+            printf("[%d], size=%d, real_size=%d\n", i, this->balls[i].size(), this->bfs_2(i));
+            this->balls[i].print();
+        }
+        std::cout << std::endl;
+    }
 }

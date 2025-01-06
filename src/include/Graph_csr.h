@@ -1,9 +1,5 @@
-//
-// Created by balmung on 08/03/19.
-//
-
-#ifndef DECREMENTALSCC_GRAPH_CSR_H
-#define DECREMENTALSCC_GRAPH_CSR_H
+#ifndef GRAPH_CSR_H
+#define GRAPH_CSR_H
 
 #include <string>
 #include "../Hash.cpp"
@@ -14,7 +10,13 @@ class Graph_csr
 {
 
 private:
-    int n, m; // number of vertices and number of edges
+    /// Number of vertices in the graph
+    int n;
+
+    /// Number of edges in the graph
+    int m;
+
+    /// Boolean value indicating whether the graph is directed or not
     bool directed;
 
     int *o_First;      // index, in o_Target, where the outedges of vertex v starts. Size n
@@ -34,50 +36,145 @@ private:
     int *visited;
     int bfs_timestamp;
 
-    // METHODS
-    void process_edges(int *edges);           // utility method used into create method
-    void init(int n, int m, bool isDirected); // dopo lo facciamo diventare il costruttore
+    void process_edges(int *edges);
 
     void propagate(int u);
 
+    void insert_edge(int u, int v);
+
 public:
     T *balls;
+
+    /**
+     * This is the default destructor of the Graph_csr class.
+     */
     ~Graph_csr();
 
-    Graph_csr(int N, int M, bool isDirected = false, int k = 0, float phi = 0.0); // constructor
-    Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions);
+    /**
+     * This is the default constructor of the Graph_csr class.
+     * @param N: number of vertices in the graph.
+     * @param M: number of edges in the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     */
+    Graph_csr(int N, int M, bool isDirected = false, int k = 0, float phi = 0.0);
 
-    void insert_edge(int u, int v); // insert edge from u to v
+    /**
+     * This is the constructor of the Graph_csr class for MinHashBall objects.
+     * @param N: number of vertices in the graph.
+     * @param M: number of edges in the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @param n_hashes: number of hash functions to use for the MinHashBall objects.
+     * @param hash_functions: array of hash functions to use for the MinHashBall objects.
+     */
+    Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions);
 
     bool check_edge(int u, int v);
 
+    /**
+     * This method performs a breadth-first search on the graph starting from the given vertex u and stops at distance 2.
+     * @param u: vertex to start the breadth-first search from.
+     * @return: size of the subgraph reachable from vertex u within distance 2.
+     */
     int bfs_2(int u);
 
+    /**
+     * This method returns the number of vertices in the graph.
+     */
     int getN() const;
 
+    /**
+     * This method sets the number of vertices in the graph.
+     * @param n: number of vertices in the graph.
+     */
     void setN(int n);
 
+    /**
+     * This method returns the number of edges in the graph.
+     */
     int getM() const;
 
+    /**
+     * This method sets the number of edges in the graph.
+     * @param m: number of edges in the graph.
+     */
     void setM(int m);
 
+    /**
+     * This method sets the threshold value for the red degree of each vertex in the graph.
+     * The threshold value is used to determine when to propagate the red edges.
+     * @see propagate
+     * @param phi: threshold value for the red degree of a vertex.
+     */
     void setThreshold(float phi);
 
+    /**
+     * This method reads the graph from the given file and returns a Graph_csr object.
+     * @param filename: name of the file containing the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @return: Graph_csr object representing the graph read from the file.
+     */
     template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0);
 
+    /**
+     * This method reads the graph from the given edges and returns a Graph_csr object.
+     * @param edges: array containing the edges of the graph.
+     * @param n: number of vertices in the graph.
+     * @param m: number of edges in the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @return: Graph_csr object representing the graph read from the edges.
+     */
     template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0);
 
+    /**
+     * This method reads the graph from the given file and returns a Graph_csr<MinHashBall> object.
+     * @param filename: name of the file containing the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @param n_hashes: number of hash functions to use for the MinHashBall objects.
+     * @param hash_functions: array of hash functions to use for the MinHashBall objects.
+     * @return: Graph_csr object representing the graph read from the file.
+     */
     template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
 
+    /**
+     * This method reads the graph from the given edges and returns a Graph_csr<MinHashBall> object.
+     * @param edges: array containing the edges of the graph.
+     * @param n: number of vertices in the graph.
+     * @param m: number of edges in the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @param n_hashes: number of hash functions to use for the MinHashBall objects.
+     * @param hash_functions: array of hash functions to use for the MinHashBall objects.
+     * @return: Graph_csr object representing the graph read from the edges.
+     */
     template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
 
+    /**
+     * This method updates the graph by adding the edge (u, v) to the graph.
+     * @param u: first endpoint of the edge to add.
+     * @param v: second endpoint of the edge to add.
+     */
     void update(int u, int v);
 
-    void print_graph();
+    /**
+     * This method prints the graph to the standard output.
+     * @param doPrintBall: boolean value indicating whether to print the balls of each vertex.
+     */
+    void print_graph(bool doPrintBall = false);
 };
 
-#endif // DECREMENTALSCC_GRAPH_CSR_H
+#endif
