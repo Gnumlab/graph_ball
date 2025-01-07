@@ -36,26 +36,26 @@ template <class T>
 Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
 {
     this->n = N;
-    this->m = M;
+    this->m = M * (2 - (int)isDirected);
     this->directed = isDirected;
     this->k = k;
     this->phi = phi;
 
-    this->o_First = new int[N];
-    this->o_Target = new int[M];
-    this->o_degree = new int[N];
-    this->o_red_degree = new int[N];
+    this->o_First = new int[this->n];
+    this->o_Target = new int[this->m];
+    this->o_degree = new int[this->n];
+    this->o_red_degree = new int[this->n];
 
     if (isDirected)
     {
-        this->i_First = new int[N];
-        this->i_Target = new int[M];
-        this->i_degree = new int[N];
-        this->i_red_degree = new int[N];
+        this->i_First = new int[this->n];
+        this->i_Target = new int[this->m];
+        this->i_degree = new int[this->n];
+        this->i_red_degree = new int[this->n];
     }
 
-    this->balls = new T[N];
-    for (int i = 0; i < n; i++)
+    this->balls = new T[this->n];
+    for (int i = 0; i < this->n; i++)
     {
         this->balls[i].insert(i);
         this->o_First[i] = 0;
@@ -70,8 +70,8 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
         }
     }
 
-    this->queue = new int[N];
-    this->visited = new int[N];
+    this->queue = new int[this->n];
+    this->visited = new int[this->n];
 
     this->bfs_timestamp = 0;
 }
@@ -83,14 +83,15 @@ Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float ph
     for (int i = 0; i < this->n; i++)
     {
         this->balls[i] = MinHashBall(hash_functions, n_hashes);
+        this->balls[i].insert(i);
     }
 }
 
 template <class T>
 void Graph_csr<T>::process_edges(int *edges)
 {
-    int *max_indegree = new int[n];  // maximum in degree for each vertex; used to initialize i_First
-    int *max_outdegree = new int[n]; // maximum out degree for each vertex; used to initialize o_First
+    int *max_indegree = new int[this->n];  // maximum in degree for each vertex; used to initialize i_First
+    int *max_outdegree = new int[this->n]; // maximum out degree for each vertex; used to initialize o_First
 
     for (int i = 0; i < this->n; i++)
     {
@@ -98,10 +99,13 @@ void Graph_csr<T>::process_edges(int *edges)
         max_outdegree[i] = 0;
     }
 
-    for (int i = 0; i < 2 * this->m; i += 2)
+    for (int i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
     {
         max_outdegree[edges[i]]++;
-        max_indegree[edges[i + 1]]++;
+        if (this->directed)
+            max_indegree[edges[i + 1]]++;
+        else
+            max_outdegree[edges[i + 1]]++;
     }
 
     // init i_First and o_First; no need to init the first vertex since it is already initialise
@@ -112,12 +116,12 @@ void Graph_csr<T>::process_edges(int *edges)
             this->i_First[i] = this->i_First[i - 1] + max_indegree[i - 1];
     }
 
-    for (int i = 0; i < 2 * this->m; i += 2)
+    for (int i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
     {
         int u = edges[i];
         int v = edges[i + 1];
-        if (!this->check_edge(u, v))
-            this->insert_edge(u, v);
+        // if (!this->check_edge(u, v))
+        this->insert_edge(u, v);
     }
 
     for (int i = 0; i < this->n; i++)
@@ -146,10 +150,7 @@ void Graph_csr<T>::setN(int n)
 template <class T>
 int Graph_csr<T>::getM() const
 {
-    if (this->directed)
-        return this->m;
-    else
-        return this->m / 2;
+    return this->m;
 }
 
 template <class T>
@@ -194,7 +195,7 @@ template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::val
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi)
 {
     int n, m;
-    int *edges = read_Graph(filename, &n, &m, isDirected);
+    int *edges = read_edges(filename, &n, &m);
     return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi);
 }
 
@@ -213,7 +214,7 @@ template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::valu
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
 {
     int n, m;
-    int *edges = read_Graph(filename, &n, &m, isDirected);
+    int *edges = read_edges(filename, &n, &m);
     return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
 }
 
@@ -371,4 +372,19 @@ void Graph_csr<T>::print_graph(bool doPrintBall)
         }
         std::cout << std::endl;
     }
+}
+
+template <class T>
+void Graph_csr<T>::fill_graph()
+{
+    int i = 0;
+    for (; i < this->n - 1; i++)
+    {
+        this->o_degree[i] = this->o_First[i + 1] - this->o_First[i];
+        if (this->directed)
+            this->i_degree[i] = this->i_First[i + 1] - this->i_First[i];
+    }
+    this->o_degree[i] = this->m - this->o_First[i];
+    if (this->directed)
+        this->i_degree[i] = this->m - this->i_First[i];
 }

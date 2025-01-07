@@ -175,6 +175,8 @@ public:
      * @param doPrintBall: boolean value indicating whether to print the balls of each vertex.
      */
     void print_graph(bool doPrintBall = false);
+
+    void fill_graph();
 };
 
 #endif
