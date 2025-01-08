@@ -1,9 +1,6 @@
-//
-// Created by balmung on 08/03/19.
-//
-
 #include <iostream>
 #include <algorithm>
+#include <queue>
 
 #include "include/Utils.h"
 #include "include/Graph_csr.h"
@@ -255,6 +252,38 @@ int Graph_csr<T>::bfs_2(int u)
     }
 
     return size;
+
+    // // performs a breadth first search on the graph starting from vertex u that stops at distance 2
+    // std::unordered_set<int> visited = std::unordered_set<int>();
+    // std::queue<pair<int, int>> q = std::queue<pair<int, int>>();
+
+    // q.push({u, 0});
+    // visited.insert(u);
+
+    // int size = 0;
+
+    // while (!q.empty())
+    // {
+    //     pair<int, int> x = q.front();
+    //     int v = x.first;
+    //     int d = x.second;
+    //     q.pop();
+    //     size++;
+
+    //     for (int i = this->o_First[v]; i < this->o_First[v] + this->o_degree[v]; i++)
+    //     {
+    //         int w = this->o_Target[i];
+
+    //         // if w has not been visited, add it to the queue
+    //         if (visited.find(w) == visited.end() && d < 2)
+    //         {
+    //             visited.insert(w);
+    //             q.push({w, d + 1});
+    //         }
+    //     }
+    // }
+
+    // return size;
 }
 
 /**
@@ -265,10 +294,21 @@ int Graph_csr<T>::bfs_2(int u)
 template <class T>
 void Graph_csr<T>::propagate(int u)
 {
-    for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
+    if (this->directed)
     {
-        int v = this->o_Target[i];
-        this->balls[v].push(&this->balls[u]);
+        for (int i = this->i_First[u]; i < this->i_First[u] + this->i_degree[u]; i++)
+        {
+            int v = this->i_Target[i];
+            this->balls[v].push(&this->balls[u]);
+        }
+    }
+    else
+    {
+        for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
+        {
+            int v = this->o_Target[i];
+            this->balls[v].push(&this->balls[u]);
+        }
     }
 }
 
@@ -335,6 +375,10 @@ void Graph_csr<T>::update(int u, int v)
             }
         }
     }
+    else
+    {
+        this->i_degree[v]++;
+    }
 }
 
 template <class T>
@@ -375,6 +419,37 @@ void Graph_csr<T>::print_graph(bool doPrintBall)
 }
 
 template <class T>
+void Graph_csr<T>::print_vertex(int i, bool doPrintBall)
+{
+    printf("nv=%d, ne=%d, direct=%d, phi=%.3f, k=%d\n", this->n, this->getM(), this->directed, this->phi, this->k);
+    int start = this->o_First[i];
+    int degree = this->o_degree[i];
+    int red_degree = this->o_red_degree[i];
+    int end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
+    printf("[%d, d=%d, \033[31mrd=%d\033[0m]:\t", i, degree, red_degree);
+
+    for (int j = start; j < end; j++)
+    {
+        if (j < start + degree - red_degree)
+            printf("\033[37m%d\033[0m ", this->o_Target[j]);
+        else if (j < start + degree)
+            printf("\033[31m%d\033[0m ", this->o_Target[j]);
+        else
+            printf("\033[38;5;254;48;5;245m%d \033[0m", this->o_Target[j]);
+    }
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    if (doPrintBall)
+    {
+        std::cout << "Balls:" << std::endl;
+        printf("[%d], size=%d, real_size=%d\n", i, this->balls[i].size(), this->bfs_2(i));
+        this->balls[i].print();
+        std::cout << std::endl;
+    }
+}
+
+template <class T>
 void Graph_csr<T>::fill_graph()
 {
     int i = 0;
@@ -387,4 +462,15 @@ void Graph_csr<T>::fill_graph()
     this->o_degree[i] = this->m - this->o_First[i];
     if (this->directed)
         this->i_degree[i] = this->m - this->i_First[i];
+}
+
+template <class T>
+void Graph_csr<T>::flush_graph()
+{
+    for (int i = 0; i < this->n; i++)
+    {
+        this->o_degree[i] = 0;
+        if (this->directed)
+            this->i_degree[i] = 0;
+    }
 }

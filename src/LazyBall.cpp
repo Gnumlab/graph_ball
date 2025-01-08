@@ -30,6 +30,7 @@ void LazyBall::push(LazyBall *B)
 {
     for (int v : B->ball1)
         this->ball2.insert(v);
+        // this->insert(v);
 }
 
 /**

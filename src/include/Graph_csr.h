@@ -177,6 +177,8 @@ public:
     void print_graph(bool doPrintBall = false);
 
     void fill_graph();
+    void flush_graph();
+    void print_vertex(int i, bool doPrintBall = false);
 };
 
 #endif
