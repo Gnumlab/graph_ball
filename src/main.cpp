@@ -24,6 +24,6 @@ int main(int argc, char const *argv[])
   std::string filename = argv[1];
   int sample_size = atoi(argv[2]);
   bool isDirected = true;
-  explicitBallSize(filename, isDirected, 0, 1.0, sample_size, 0.05, 1000);
+  explicitBallSize(filename, isDirected, 0, 1.0, sample_size, 0.00, 1000, false);
   return 0;
 }

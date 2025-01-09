@@ -5,6 +5,6 @@
 #include <vector>
 
 int* read_edges(std::string filename, int *n, int *m);
-std::vector<int> *topKBall2(std::string filename, int k, bool isDirected);
+void permute_edges(int* edges, int size);
 
 #endif 

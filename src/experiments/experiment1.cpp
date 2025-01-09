@@ -25,15 +25,17 @@ std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
 }
 
 // template <class T>
-void explicitBallSize(std::string filename, bool isDirected, int k, float phi, int sample_size, float initial_density = 0.3, int query_freq = 1000)
+void explicitBallSize(std::string filename, bool isDirected, int k, float phi, int sample_size, float initial_density = 0.3, int query_freq = 1000, bool random_permutation = false)
 {
     cerr << "Reading graph from file: " << filename << endl;
     Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, k, phi);
     std::vector<int> query_vertices = *topKBall2(G, sample_size);
 
+    
+
     int n, m;
     int *edges = read_edges(filename, &n, &m);
-
+    if (random_permutation) permute_edges(edges, 2 * m);
     // initialize the graph
     cerr << "Initializing the graph with " << initial_density << " density" << endl;
     int i = 0;
