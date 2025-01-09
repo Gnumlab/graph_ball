@@ -32,6 +32,7 @@
 *.app
 
 # Folders
+data/
 dataset/raw/
 build/
 results/
