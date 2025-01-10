@@ -1,4 +1,3 @@
-#include "../include/Graph_csr.h"
 #include "../include/LazyBall.h"
 #include "../include/Utils.h"
 #include <algorithm>
@@ -24,49 +23,55 @@ std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
     return result;
 }
 
-// template <class T>
-void explicitBallSize(std::string filename, bool isDirected, int k, float phi, int sample_size, float initial_density = 0.3, int query_freq = 1000, bool random_permutation = false)
+void explicitBallSize(std::string filename, bool isDirected, int k, float phi, int sample_size, float initial_density = 0.3, int query_freq = 1000, bool exactBall = false)
 {
+    cerr << "Experiment Parameters" << endl;
+    cerr << "Filename: " << filename << endl;
+    cerr << "isDirected: " << isDirected << endl;
+    cerr << "k: " << k << endl;
+    cerr << "phi: " << phi << endl;
+    cerr << "sample_size: " << sample_size << endl;
+    cerr << "initial_density: " << initial_density << endl;
+    cerr << "query_freq: " << query_freq << endl;
+    cerr << "exactBall: " << exactBall << endl;
+    cerr << "--------------------------------" << endl;
+
     cerr << "Reading graph from file: " << filename << endl;
     Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, k, phi);
     std::vector<int> query_vertices = *topKBall2(G, sample_size);
 
-    
-
     int n, m;
     int *edges = read_edges(filename, &n, &m);
-    if (random_permutation) permute_edges(edges, 2 * m);
+
     // initialize the graph
     cerr << "Initializing the graph with " << initial_density << " density" << endl;
     int i = 0;
     for (; i < 2 * (m * initial_density); i += 2)
     {
-        G->update(edges[i], edges[i + 1]);
+        if (!exactBall)
+            G->update(edges[i], edges[i + 1]);
+        else
+            G->insert_edge(edges[i], edges[i + 1]);
+
         cerr << "\r" << i / 2;
     }
 
     cerr << "\nStarting the experiment" << endl;
-    printf("timestamp,vertex,estimated_ball_size,exact_ball_size\n");
+    printf("timestamp,vertex,ball_size\n");
     for (; i < 2 * m; i += 2)
     {
-        G->update(edges[i], edges[i + 1]);
+        if (!exactBall)
+            G->update(edges[i], edges[i + 1]);
+        else
+            G->insert_edge(edges[i], edges[i + 1]);
 
         if (i % query_freq == 0)
         {
             // #pragma omp parallel for
             for (auto u : query_vertices)
             {
-                int estimated_ball_size = G->balls[u].size();
-                int exact_ball_size = G->bfs_2(u);
-
-                if (estimated_ball_size > exact_ball_size)
-                {
-                    cerr << "ERROR: " << i << " " << u << " " << estimated_ball_size << " " << exact_ball_size << endl;
-                    cerr << edges[i] << " " << edges[i + 1] << endl;
-                    G->print_vertex(u, true);
-                    exit(0);
-                }
-                printf("%d, %d, %d, %d\n", i / 2, u, estimated_ball_size, exact_ball_size);
+                int ball_size = !exactBall ? G->balls[u].size() : G->bfs_2(u);
+                printf("%d, %d, %d\n", i / 2, u, ball_size);
             }
         }
         cerr << "\r" << i / 2;

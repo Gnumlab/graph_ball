@@ -1,29 +1,27 @@
-#include "include/Utils.h"
-// #include "include/Graph_csr.h"
 #include "Graph_csr.cpp"
-#include <algorithm>
-#include <cstdint>
-#include <omp.h>
+#include <cstring>
 #include <iostream>
-#include "include/ExactBall.h"
-#include "include/LazyBall.h"
-#include "include/MinHashBall.h"
-#include "include/Utils.h"
 #include "experiments/experiment1.cpp"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-  if (argc < 3) {
-    cout << "Usage: ./main <filename> <sample_size>" << endl;
+  if (argc < 3)
+  {
+    cerr << "Usage: ./build/apps/Graph <filename> <sample_size> [-exact]" << endl;
     return 1;
   }
-  
 
   std::string filename = argv[1];
-  int sample_size = atoi(argv[2]);
   bool isDirected = true;
-  explicitBallSize(filename, isDirected, 0, 1.0, sample_size, 0.00, 1000, false);
+  int k = 0;
+  float phi = 1.0;
+  int sample_size = atoi(argv[2]);
+  float initial_density = 0.05;
+  int query_freq = 1000;
+  bool exactBall = (argc == 4 && strcmp(argv[3], "-exact") == 0);
+
+  explicitBallSize(filename, isDirected, k, phi, sample_size, initial_density, query_freq, exactBall);
   return 0;
 }

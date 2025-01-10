@@ -40,7 +40,6 @@ private:
 
     void propagate(int u);
 
-    void insert_edge(int u, int v);
 
 public:
     T *balls;
@@ -110,6 +109,14 @@ public:
      * @param phi: threshold value for the red degree of a vertex.
      */
     void setThreshold(float phi);
+
+    /**
+     * This method inserts the edge (u, v) into the graph.
+     * @param u: first endpoint of the edge to insert.
+     * @param v: second endpoint of the edge to insert.
+     * @return: void
+     */
+    void insert_edge(int u, int v);
 
     /**
      * This method reads the graph from the given file and returns a Graph_csr object.
