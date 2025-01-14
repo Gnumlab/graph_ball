@@ -17,15 +17,15 @@ MinHashBall::MinHashBall()
  * @param hash: array of hash functions used to hash the vertices.
  * @param k: number of hash functions used to hash the vertices.
  */
-MinHashBall::MinHashBall(Hash<int> **hash, int k)
+MinHashBall::MinHashBall(Hash<uint32_t> **hash, int k)
 {
-    this->ball1 = new int[k];
-    this->ball2 = new int[k];
+    this->ball1 = new uint32_t[k];
+    this->ball2 = new uint32_t[k];
 
     for (int i = 0; i < k; i++)
     {
-        this->ball1[i] = INT32_MAX;
-        this->ball2[i] = INT32_MAX;
+        this->ball1[i] = UINT32_MAX;
+        this->ball2[i] = UINT32_MAX;
     }
 
     this->hash = hash;
@@ -41,7 +41,7 @@ void MinHashBall::insert(int v)
 {
     for (int i = 0; i < this->k; i++)
     {
-        int h = (*this->hash[i])(v);
+        uint32_t h = (*this->hash[i])(v);
         if (h < this->ball1[i])
             this->ball1[i] = h;
 
@@ -59,7 +59,7 @@ void MinHashBall::push(MinHashBall *B)
 {
     for (int i = 0; i < this->k; i++)
     {
-        int v = B->ball1[i];
+        uint32_t v = B->ball1[i];
         if (v < this->ball2[i])
             this->ball2[i] = v;
     }
@@ -73,7 +73,7 @@ int MinHashBall::size()
 {
     float size = 0.0;
     for (int i = 0; i < this->k; i++)
-        size += (float)INT32_MAX / (float)this->ball2[i] - 1;
+        size += (float)UINT32_MAX / (float)this->ball2[i] - 1;
     return static_cast<int>(size / (float)this->k);
 }
 
@@ -115,4 +115,13 @@ void MinHashBall::print()
         }
     }
     std::cout << std::endl;
+}
+
+void MinHashBall::flush()
+{
+    for (int i = 0; i < this->k; i++)
+    {
+        this->ball1[i] = UINT32_MAX;
+        this->ball2[i] = UINT32_MAX;
+    }
 }

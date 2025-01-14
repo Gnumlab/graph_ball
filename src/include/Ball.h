@@ -10,6 +10,7 @@ public:
     virtual int size() { return 0; }
     static float similarity(Ball *, Ball *) { return 0.0; }
     virtual void print() {}
+    virtual void flush() {}
 };
 
 #endif

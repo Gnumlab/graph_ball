@@ -1,6 +1,30 @@
 #include "../include/LazyBall.h"
 #include "../include/Utils.h"
+// #include "../include/Graph_csr.h"
 #include <algorithm>
+#include "../Graph_csr.cpp"
+#include <chrono>
+
+using namespace std;
+
+void printSortedBallSizes(std::string filename, bool isDirected)
+{
+    Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
+    G->fill_graph();
+
+    std::vector<std::pair<int, int>> nodes = std::vector<std::pair<int, int>>(G->getN());
+    for (int i = 0; i < G->getN(); i++)
+        nodes[i] = {i, G->bfs_2(i)};
+
+    std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
+              { return a.second > b.second; });
+
+    for (int i = 0; i < G->getN(); i++)
+        cout << nodes[i].first << " " << nodes[i].second << endl;
+
+    delete G;
+    return;
+}
 
 template <class T>
 std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
@@ -76,5 +100,44 @@ void explicitBallSize(std::string filename, bool isDirected, int k, float phi, i
             }
         }
         cerr << "\r" << i / 2;
+    }
+}
+
+void executeAllUpdates(Graph_csr<MinHashBall> *G, int m, int *edges)
+{
+    for (int i = 0; i < 2 * m; i += 2)
+        G->update(edges[i], edges[i + 1]);
+}
+
+void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std::vector<float> phis, int n_hashes)
+{
+
+    TabulationHash<uint32_t> **hash_functions = new TabulationHash<uint32_t> *[n_hashes];
+    for (int i = 0; i < n_hashes; i++)
+        hash_functions[i] = new TabulationHash<uint32_t>();
+
+    Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file(filename, isDirected, 0, 0.0, n_hashes, (Hash<uint32_t> **)hash_functions);
+
+    int n, m;
+    int *edges = read_edges(filename, &n, &m);
+
+    for (float phi : phis)
+    {
+        G->setThreshold(phi);
+        for (int k : ks)
+        {
+            G->setK(k);
+            G->flush_graph();
+
+            auto start = std::chrono::high_resolution_clock::now();
+            executeAllUpdates(G, m, edges);
+
+            // ending time
+            auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
+            float t = duration.count() / 1000000.0;
+
+            // dataset, n, m, k, phi, n_hashes, time
+            printf("%s,%d,%d,%d,%.3f,%d,%f\n", filename.c_str(), n, m, k, phi, n_hashes, t);
+        }
     }
 }

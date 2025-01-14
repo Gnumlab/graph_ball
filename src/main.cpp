@@ -1,12 +1,22 @@
-#include "Graph_csr.cpp"
+// #include "Graph_csr.cpp"
 #include <cstring>
 #include <iostream>
-#include "experiments/experiment1.cpp"
+#include "experiments/experiments.cpp"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
+  std::string fname = argv[1];
+  bool directed = (bool) atoi(argv[2]);
+  std::vector<int> ks = {3,10};
+  std::vector<float> phis = {0.6, 0.8, 1.0};
+  int n_hashes = 100;
+  updatesTime(fname, directed, ks, phis, n_hashes);
+
+  // printSortedBallSizes(fname, directed);
+  exit(0);
+
   if (argc < 3)
   {
     cerr << "Usage: ./build/apps/Graph <filename> <sample_size> [-exact]" << endl;

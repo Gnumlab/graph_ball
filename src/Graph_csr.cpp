@@ -74,7 +74,7 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
 }
 
 template <class MinHashBall>
-Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
     : Graph_csr<MinHashBall>(N, M, isDirected, k, phi)
 {
     for (int i = 0; i < this->n; i++)
@@ -208,7 +208,7 @@ Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected
 // implemntation for MinHashBall
 template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     int n, m;
     int *edges = read_edges(filename, &n, &m);
@@ -217,7 +217,7 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 
 template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions)
+Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, n_hashes, hash_functions);
     graph->process_edges(edges);
@@ -321,6 +321,12 @@ void Graph_csr<T>::setThreshold(float phi)
 }
 
 template <class T>
+void Graph_csr<T>::setK(int k)
+{
+    this->k = k;
+}
+
+template <class T>
 int Graph_csr<T>::update(int u, int v)
 {
     int n_merge = 0;
@@ -361,6 +367,8 @@ int Graph_csr<T>::update(int u, int v)
             }
             else
             {
+                if (this->i_degree[u] == 0)
+                    break;
                 int rand_index = this->i_First[u] + (rand() % this->i_degree[u]);
                 int x = this->i_Target[rand_index];
                 this->balls[x].push(&this->balls[u]);
@@ -401,6 +409,29 @@ int Graph_csr<T>::update(int u, int v)
 
     return n_merge;
 }
+
+// template <class T>
+// int Graph_csr<T>::trivial_update(int u, int v)
+// {
+//     int n_merge = 0;
+
+//     // increment the degree of u
+//     this->o_degree[u]++;
+
+//     this->balls[u].ball2.insert(v);
+//     n_merge++;
+
+//     // for each neighbour w of u
+//     for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
+//     {
+//         int w = this->o_Target[i];
+//         this->balls[w].ball2.insert(v);
+//         this->balls[v].ball2.insert(w);
+//         n_merge += 2;
+//     }
+
+//     return n_merge;
+// }
 
 template <class T>
 void Graph_csr<T>::print_graph(bool doPrintBall)
@@ -493,5 +524,7 @@ void Graph_csr<T>::flush_graph()
         this->o_degree[i] = 0;
         if (this->directed)
             this->i_degree[i] = 0;
+
+        this->balls[i].flush();
     }
 }

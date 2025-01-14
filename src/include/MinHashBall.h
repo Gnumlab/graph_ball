@@ -8,18 +8,19 @@
 class MinHashBall : public Ball
 {
 private:
-    int* ball1;
-    int* ball2;
-    Hash<int>** hash;
+    uint32_t* ball1;
+    uint32_t* ball2;
+    Hash<uint32_t>** hash;
     int k;
 public:
     MinHashBall();
-    MinHashBall(Hash<int>** hash, int k);
+    MinHashBall(Hash<uint32_t>** hash, int k);
     void insert(int v);
     void push(MinHashBall *B);
     int size();
     static float similarity(MinHashBall *B1, MinHashBall *B2);
     void print();
+    void flush();
 };
 
 #endif

@@ -6,6 +6,7 @@ if len(sys.argv) < 2:
     exit(0)
 
 FILE_NAME = sys.argv[1]
+IS_DIRECTED = False if len(sys.argv) < 3 else sys.argv[2] == "--directed"
 
 # read file
 lines = [
@@ -18,13 +19,18 @@ lines = [
 lines.sort(key=lambda x: x[2])
 
 # normalize node index to start from 0
-min_node_index = float("inf")
+id = 0
+node_map = dict()
 for u, v, _ in lines:
-    min_node_index = min(min_node_index, u, v)
-
+    if u not in node_map:
+        node_map[u] = id
+        id += 1
+    if v not in node_map:
+        node_map[v] = id
+        id += 1
 
 for i, (u, v, t) in enumerate(lines):
-    lines[i] = (u - min_node_index, v - min_node_index, t)
+    lines[i] = (node_map[u], node_map[v], t)
 
 # remove duplicate edges
 d = defaultdict(int)
@@ -34,16 +40,17 @@ for u, v, _ in lines:
     if d[(u, v)] == 0:
         _edges.append((u, v))
         d[(u, v)] += 1
+        d[(v, u)] += int(not IS_DIRECTED)
+
 
 m = len(_edges)
-
 n = len(set([u for u, _ in _edges] + [v for _, v in _edges]))
 
 max1 = max(_edges, key=lambda x: x[0])
 max2 = max(_edges, key=lambda x: x[1])
 
 print(f"n: {n}, m: {m}")
-print(f"max1: {max1}, max2: {max2}")
+# print(f"max1: {max1}, max2: {max2}")
 assert n == max(max1[0], max2[1]) + 1
 
 # write to file

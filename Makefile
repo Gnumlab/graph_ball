@@ -4,7 +4,7 @@ LDFLAGS  := -L/usr/lib -fopenmp -lm
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
-TARGET   := Graph
+TARGET   := run
 INCLUDE  := -Iinclude/
 SRC      :=                      \
    $(wildcard src/*.cpp)          \

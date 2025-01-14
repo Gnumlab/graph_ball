@@ -69,7 +69,7 @@ public:
      * @param n_hashes: number of hash functions to use for the MinHashBall objects.
      * @param hash_functions: array of hash functions to use for the MinHashBall objects.
      */
-    Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<int> **hash_functions);
+    Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions);
 
     bool check_edge(int u, int v);
 
@@ -109,6 +109,8 @@ public:
      * @param phi: threshold value for the red degree of a vertex.
      */
     void setThreshold(float phi);
+
+    void setK(int k);
 
     /**
      * This method inserts the edge (u, v) into the graph.
@@ -153,7 +155,7 @@ public:
      * @return: Graph_csr object representing the graph read from the file.
      */
     template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
-    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
+    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<uint32_t> **hash_functions = NULL);
 
     /**
      * This method reads the graph from the given edges and returns a Graph_csr<MinHashBall> object.
@@ -168,7 +170,7 @@ public:
      * @return: Graph_csr object representing the graph read from the edges.
      */
     template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
-    static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<int> **hash_functions = NULL);
+    static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<uint32_t> **hash_functions = NULL);
 
     /**
      * This method updates the graph by adding the edge (u, v) to the graph.
