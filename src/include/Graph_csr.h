@@ -38,7 +38,7 @@ private:
 
     void process_edges(int *edges);
 
-    void propagate(int u);
+    int propagate(int u);
 
 
 public:
@@ -175,7 +175,7 @@ public:
      * @param u: first endpoint of the edge to add.
      * @param v: second endpoint of the edge to add.
      */
-    void update(int u, int v);
+    int update(int u, int v);
 
     /**
      * This method prints the graph to the standard output.

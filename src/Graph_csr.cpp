@@ -292,7 +292,7 @@ int Graph_csr<T>::bfs_2(int u)
  * @return: void
  */
 template <class T>
-void Graph_csr<T>::propagate(int u)
+int Graph_csr<T>::propagate(int u)
 {
     if (this->directed)
     {
@@ -301,6 +301,7 @@ void Graph_csr<T>::propagate(int u)
             int v = this->i_Target[i];
             this->balls[v].push(&this->balls[u]);
         }
+        return this->i_degree[u];
     }
     else
     {
@@ -309,6 +310,7 @@ void Graph_csr<T>::propagate(int u)
             int v = this->o_Target[i];
             this->balls[v].push(&this->balls[u]);
         }
+        return this->o_degree[u];
     }
 }
 
@@ -319,8 +321,10 @@ void Graph_csr<T>::setThreshold(float phi)
 }
 
 template <class T>
-void Graph_csr<T>::update(int u, int v)
+int Graph_csr<T>::update(int u, int v)
 {
+    int n_merge = 0;
+
     // increment the red degree of u
     this->o_red_degree[u]++;
 
@@ -329,9 +333,11 @@ void Graph_csr<T>::update(int u, int v)
 
     // insert v into the ball of u
     this->balls[u].insert(v);
+    n_merge++;
 
     // push the ball of radius 1 of v to the ball of radius 2 of u
     this->balls[u].push(&this->balls[v]);
+    n_merge++;
 
     // check if the red degree of u is greater than the threshold
     float threshold = this->phi * (this->o_degree[u] - this->o_red_degree[u]);
@@ -340,15 +346,25 @@ void Graph_csr<T>::update(int u, int v)
         // reset the red degree of u
         this->o_red_degree[u] = 0;
         // propagate the verites of u's ball of radius 1 to the ball of radius 2 of all its neighbours
-        this->propagate(u);
+        n_merge += this->propagate(u);
     }
     else
     {
+        n_merge += min(this->k, !this->directed ? this->o_degree[u] : this->i_degree[u]);
         for (int i = 0; i < this->k; i++)
         {
-            int rand_index = this->o_First[u] + (rand() % this->o_degree[u]);
-            int x = this->o_Target[rand_index];
-            this->balls[x].push(&this->balls[u]);
+            if (!this->directed)
+            {
+                int rand_index = this->o_First[u] + (rand() % this->o_degree[u]);
+                int x = this->o_Target[rand_index];
+                this->balls[x].push(&this->balls[u]);
+            }
+            else
+            {
+                int rand_index = this->i_First[u] + (rand() % this->i_degree[u]);
+                int x = this->i_Target[rand_index];
+                this->balls[x].push(&this->balls[u]);
+            }
         }
     }
 
@@ -357,16 +373,19 @@ void Graph_csr<T>::update(int u, int v)
         this->o_red_degree[v]++;
         this->o_degree[v]++;
         this->balls[v].insert(u);
+        n_merge++;
         this->balls[v].push(&this->balls[u]);
+        n_merge++;
 
         threshold = this->phi * (this->o_degree[v] - this->o_red_degree[v]);
         if (this->o_red_degree[v] >= threshold)
         {
             this->o_red_degree[v] = 0;
-            this->propagate(v);
+            n_merge += this->propagate(v);
         }
         else
         {
+            n_merge += min(this->k, this->o_degree[v]);
             for (int i = 0; i < k; i++)
             {
                 int rand_index = this->o_First[v] + (rand() % this->o_degree[v]);
@@ -379,6 +398,8 @@ void Graph_csr<T>::update(int u, int v)
     {
         this->i_degree[v]++;
     }
+
+    return n_merge;
 }
 
 template <class T>

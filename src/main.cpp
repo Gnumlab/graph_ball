@@ -22,9 +22,6 @@ int main(int argc, char const *argv[])
   int query_freq = 1000;
   bool exactBall = (argc == 4 && strcmp(argv[3], "-exact") == 0);
 
-  // explicitBallSize(filename, isDirected, k, phi, sample_size, initial_density, query_freq, exactBall);
-
-  int n_hashes = 1000;
-  minhashSketchBallSize(filename, isDirected, n_hashes, k, phi, sample_size, initial_density, query_freq);
+  explicitBallSize(filename, isDirected, k, phi, sample_size, initial_density, query_freq, exactBall);
   return 0;
 }
