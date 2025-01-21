@@ -6,8 +6,7 @@ OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
 TARGET   := run
 INCLUDE  := -Iinclude/
-SRC      :=                      \
-   $(wildcard src/*.cpp)          \
+SRC      := $(wildcard src/*.cpp)
 
 OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)
 

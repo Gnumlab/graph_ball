@@ -173,6 +173,16 @@ public:
     static Graph_csr<T> *from_edges(int *edges, int n, int m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<uint32_t> **hash_functions = NULL);
 
     /**
+     * This method computes minhash signatures for the ball of radius 2 of the given vertex u.
+     * It performs a breadth-first search starting from vertex u and stops at distance 2.
+     * The minhash signatures are computed using the given hash functions.
+     * @param u: vertex for which to compute the minhash signatures.
+     * @param n_hashes: number of hash functions to use.
+     * @param hash_functions: array of hash functions to use.
+     */
+    uint32_t *computeExactSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions);
+
+    /**
      * This method updates the graph by adding the edge (u, v) to the graph.
      * @param u: first endpoint of the edge to add.
      * @param v: second endpoint of the edge to add.
@@ -185,8 +195,18 @@ public:
      */
     void print_graph(bool doPrintBall = false);
 
+    /**
+     * This method fills the graph with all the edges red from the file.
+     * The complexity of this method is O(n), since it set the degree of each vertex to the number of edges incident to it.
+     */
     void fill_graph();
+
+    /**
+     * This method flushes the graph by removing all the edges from the graph.
+     * The complexity of this method is O(n), since it set the degree of each vertex to 0.
+     */
     void flush_graph();
+
     void print_vertex(int i, bool doPrintBall = false);
 };
 

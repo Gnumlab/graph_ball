@@ -1,52 +1,25 @@
 #include "../include/LazyBall.h"
 #include "../include/Utils.h"
-// #include "../include/Graph_csr.h"
-#include <algorithm>
 #include "../Graph_csr.cpp"
+#include "../Hash.cpp"
+#include "preprocessing.cpp"
+#include <algorithm>
 #include <chrono>
 
 using namespace std;
 
-void printSortedBallSizes(std::string filename, bool isDirected)
-{
-    Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
-    G->fill_graph();
-
-    std::vector<std::pair<int, int>> nodes = std::vector<std::pair<int, int>>(G->getN());
-    for (int i = 0; i < G->getN(); i++)
-        nodes[i] = {i, G->bfs_2(i)};
-
-    std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
-              { return a.second > b.second; });
-
-    for (int i = 0; i < G->getN(); i++)
-        cout << nodes[i].first << " " << nodes[i].second << endl;
-
-    delete G;
-    return;
-}
-
-template <class T>
-std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
-{
-    // Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
-    G->fill_graph();
-
-    std::vector<std::pair<int, int>> nodes = std::vector<std::pair<int, int>>(G->getN());
-    for (int i = 0; i < G->getN(); i++)
-        nodes[i] = {i, G->bfs_2(i)};
-
-    std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
-              { return a.second > b.second; });
-
-    std::vector<int> *result = new std::vector<int>(k);
-    for (int i = 0; i < k; i++)
-        (*result)[i] = nodes[i].first;
-
-    G->flush_graph();
-    return result;
-}
-
+/**
+ * This function performs the experiment of updating a graph, and printing the size of the ball of radius 2 of a sample of vertices.
+ * @param filename: name of the file containing the graph.
+ * @param isDirected: boolean indicating if the graph is directed.
+ * @param k: sampling parameter of the graph.
+ * @param phi: threshold parameter of the graph.
+ * @param sample_size: number of vertices to sample.
+ * @param initial_density: initial density of the graph (default 0.3). This function initializes the graph with a fraction of the edges before starting the experiment.
+ * @param query_freq: each `query_freq` updates, the size of the balls of radius 2 of the sampled vertices is printed.
+ * @param exactBall: boolean indicating if the ball of radius 2 is computed using lazy updates or exact using the BFS algorithm.
+ * @return: void
+ */
 void explicitBallSize(std::string filename, bool isDirected, int k, float phi, int sample_size, float initial_density = 0.3, int query_freq = 1000, bool exactBall = false)
 {
     cerr << "Experiment Parameters" << endl;
@@ -103,12 +76,28 @@ void explicitBallSize(std::string filename, bool isDirected, int k, float phi, i
     }
 }
 
+/**
+ * This function performs all the updates in the graph.
+ * @param G: Graph_csr object representing the graph.
+ * @param m: number of insertions (edges) to perform.
+ * @param edges: array of edges to insert.
+ * @return: void
+ */
 void executeAllUpdates(Graph_csr<MinHashBall> *G, int m, int *edges)
 {
     for (int i = 0; i < 2 * m; i += 2)
         G->update(edges[i], edges[i + 1]);
 }
 
+/**
+ * This function performs the experiment of updating a graph using minhash sketches, and printing the time taken to perform all the updates.
+ * @param filename: name of the file containing the graph.
+ * @param isDirected: boolean indicating if the graph is directed.
+ * @param ks: vector of values of k to test.
+ * @param phi: vector of values of phi to test.
+ * @param n_hashes: number of hash functions to use in the minhash sketches.
+ * @return: void
+ */
 void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std::vector<float> phis, int n_hashes)
 {
 

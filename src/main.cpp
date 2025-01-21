@@ -5,16 +5,37 @@
 
 using namespace std;
 
+void computeMinHashSignatures()
+{
+  std::vector<float> densities = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+  std::vector<std::pair<std::string, bool>> dataset = {
+      {"comm-linux-kernel-reply", true},
+      {"fb-wosn-friends", false},
+      {"ia-enron-email-all", true},
+      {"soc-youtube-growth", true},
+      {"soc-flickr-growth", true},
+  };
+  std::vector<int> n_hashes = {2000};
+
+  for (auto d : dataset)
+  {
+    for (int n_hash : n_hashes) {
+      writeMinHashSignatures(d.first, d.second, n_hash, 5000, densities);
+    }
+  }
+  return;
+}
+
 int main(int argc, char const *argv[])
 {
-  std::string fname = argv[1];
-  bool directed = (bool) atoi(argv[2]);
-  std::vector<int> ks = {3,10};
+  computeMinHashSignatures();
+  return 0;
+
+  bool directed = (bool)atoi(argv[2]);
+  std::vector<int> ks = {3, 10};
   std::vector<float> phis = {0.6, 0.8, 1.0};
   int n_hashes = 100;
-  updatesTime(fname, directed, ks, phis, n_hashes);
 
-  // printSortedBallSizes(fname, directed);
   exit(0);
 
   if (argc < 3)

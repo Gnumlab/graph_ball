@@ -11,6 +11,11 @@ LazyBall::LazyBall()
 }
 
 /**
+ * This is the default destructor of the LazyBall class.
+ */
+LazyBall::~LazyBall() {}
+
+/**
  * This method is used to insert the given element v into both ball1 and ball2 of the current LazyBall object.
  * @param v: element to be inserted into the ball1 and ball2 of the current LazyBall object.
  * @return: void

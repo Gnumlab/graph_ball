@@ -8,9 +8,10 @@ class ExactBall : public Ball
 {
 private:
     std::unordered_set<int> ball;
-    int last_insert_element;
+    int last_element;
 public:
     ExactBall();
+    ~ExactBall();
     void insert(int v);
     void push(ExactBall *B);
     int size();

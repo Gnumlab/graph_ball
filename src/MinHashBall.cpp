@@ -19,6 +19,22 @@ MinHashBall::MinHashBall()
  */
 MinHashBall::MinHashBall(Hash<uint32_t> **hash, int k)
 {
+    this->init(hash, k);
+    // this->ball1 = new uint32_t[k];
+    // this->ball2 = new uint32_t[k];
+
+    // for (int i = 0; i < k; i++)
+    // {
+    //     this->ball1[i] = UINT32_MAX;
+    //     this->ball2[i] = UINT32_MAX;
+    // }
+
+    // this->hash = hash;
+    // this->k = k;
+}
+
+void MinHashBall::init(Hash<uint32_t> **hash, int k)
+{
     this->ball1 = new uint32_t[k];
     this->ball2 = new uint32_t[k];
 
@@ -32,8 +48,17 @@ MinHashBall::MinHashBall(Hash<uint32_t> **hash, int k)
     this->k = k;
 }
 
+MinHashBall::~MinHashBall()
+{
+    if (this->ball1 != nullptr)
+    {
+        delete[] this->ball1;
+        delete[] this->ball2;
+    } 
+}
+
 /**
- * This method is used to insert the given element v into the ball1 and ball2 of the current MinHashBall object.
+ * This method is used to insert the given element v into the ball1 of the current MinHashBall object.
  * @param v: element to be inserted into the ball1 and ball2 of the current MinHashBall object.
  * @return: void
  */
@@ -45,6 +70,7 @@ void MinHashBall::insert(int v)
         if (h < this->ball1[i])
             this->ball1[i] = h;
 
+        // TODO: testa rimuovendo questo
         if (h < this->ball2[i])
             this->ball2[i] = h;
     }
@@ -94,12 +120,23 @@ float MinHashBall::similarity(MinHashBall *B1, MinHashBall *B2)
     return (float)count / B1->k;
 }
 
+/**
+ * This method returns the minhash signature of the ball2 of the current MinHashBall object.
+ * @return: signature of the current MinHashBall object.
+ */
+uint32_t *MinHashBall::getSignature()
+{
+    return this->ball2;
+}
+
 void MinHashBall::print()
 {
     std::cout << "\tS(B1): ";
-    for (int i = 0; i < this->k; i++) {
+    for (int i = 0; i < this->k; i++)
+    {
         std::cout << this->ball1[i] << " ";
-        if (i == 10) {
+        if (i == 10)
+        {
             std::cout << "...";
             break;
         }
@@ -107,9 +144,11 @@ void MinHashBall::print()
     std::cout << std::endl;
 
     std::cout << "\tS(B2): ";
-    for (int i = 0; i < this->k; i++) {
-        std::cout << this->ball2[i] << " "; 
-        if (i == 10) {
+    for (int i = 0; i < this->k; i++)
+    {
+        std::cout << this->ball2[i] << " ";
+        if (i == 10)
+        {
             std::cout << "...";
             break;
         }

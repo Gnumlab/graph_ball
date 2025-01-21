@@ -15,10 +15,13 @@ private:
 public:
     MinHashBall();
     MinHashBall(Hash<uint32_t>** hash, int k);
+    ~MinHashBall();
+    void init(Hash<uint32_t>** hash, int k);
     void insert(int v);
     void push(MinHashBall *B);
     int size();
     static float similarity(MinHashBall *B1, MinHashBall *B2);
+    uint32_t* getSignature();
     void print();
     void flush();
 };

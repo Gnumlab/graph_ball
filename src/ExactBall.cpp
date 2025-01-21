@@ -3,21 +3,20 @@
 ExactBall::ExactBall()
 {
     this->ball = std::unordered_set<int>();
-    this->last_insert_element = -1;
+    this->last_element = -1;
 }
+
+ExactBall::~ExactBall() {}
 
 void ExactBall::insert(int v)
 {
     this->ball.insert(v);
-    this->last_insert_element = v;
+    this->last_element = v;
 }
 
 void ExactBall::push(ExactBall *B)
 {
-    // ExactBall *ball = dynamic_cast<ExactBall *>(B);
-    this->ball.insert(B->last_insert_element);
-    // for (int v : ball->ball)
-    //     this->ball.insert(v);
+    this->ball.insert(B->last_element);
 }
 
 int ExactBall::size()

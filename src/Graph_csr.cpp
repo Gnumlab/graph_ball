@@ -1,31 +1,34 @@
+#ifndef GRAPH_CSR_CPP
+#define GRAPH_CSR_CPP
+
 #include <iostream>
 #include <algorithm>
 #include <queue>
 
 #include "include/Utils.h"
 #include "include/Graph_csr.h"
-#include "include/MinHashBall.h"
-#include "Hash.cpp"
+// #include "include/MinHashBall.h"
+// #include "Hash.cpp"
 
 template <class T>
 Graph_csr<T>::~Graph_csr()
 {
-    delete[] o_First;
-    delete[] o_Target;
-    delete[] o_degree;
-    delete[] o_red_degree;
+    delete[] this->o_First;
+    delete[] this->o_Target;
+    delete[] this->o_degree;
+    delete[] this->o_red_degree;
 
     if (this->directed)
     {
-        delete[] i_First;
-        delete[] i_Target;
-        delete[] i_degree;
-        delete[] i_red_degree;
+        delete[] this->i_First;
+        delete[] this->i_Target;
+        delete[] this->i_degree;
+        delete[] this->i_red_degree;
     }
 
-    delete[] queue;
-    delete[] visited;
-    delete[] balls;
+    delete[] this->queue;
+    delete[] this->visited;
+    delete[] this->balls;
 }
 
 // constructor
@@ -52,6 +55,7 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
     }
 
     this->balls = new T[this->n];
+
     for (int i = 0; i < this->n; i++)
     {
         this->balls[i].insert(i);
@@ -79,7 +83,8 @@ Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float ph
 {
     for (int i = 0; i < this->n; i++)
     {
-        this->balls[i] = MinHashBall(hash_functions, n_hashes);
+        // this->balls[i] = MinHashBall(hash_functions, n_hashes);
+        this->balls[i].init(hash_functions, n_hashes);
         this->balls[i].insert(i);
     }
 }
@@ -193,7 +198,9 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 {
     int n, m;
     int *edges = read_edges(filename, &n, &m);
-    return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi);
+    Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi);
+    delete[] edges;
+    return graph;
 }
 
 template <class T>
@@ -212,7 +219,9 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 {
     int n, m;
     int *edges = read_edges(filename, &n, &m);
-    return Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
+    Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
+    delete[] edges;
+    return graph;
 }
 
 template <class T>
@@ -284,6 +293,62 @@ int Graph_csr<T>::bfs_2(int u)
     // }
 
     // return size;
+}
+
+template <class T>
+uint32_t *Graph_csr<T>::computeExactSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions)
+{
+    // initialize the signature
+    uint32_t *signature = new uint32_t[n_hashes];
+    for (int i = 0; i < n_hashes; i++)
+        signature[i] = UINT32_MAX;
+
+    // insert u into the minhash sketch
+    for (int t = 0; t < n_hashes; t++)
+    {
+        uint32_t h = (*hash_functions[t])(u);
+        if (h < signature[t])
+            signature[t] = h;
+    }
+
+    bfs_timestamp++;
+    visited[u] = bfs_timestamp;
+
+    // insert each neighbour of u into the minhash sketch
+    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    {
+
+        int v = o_Target[i];
+
+        if (visited[v] != bfs_timestamp)
+        {
+            visited[v] = bfs_timestamp;
+            for (int t = 0; t < n_hashes; t++)
+            {
+                uint32_t h = (*hash_functions[t])(v);
+                if (h < signature[t])
+                    signature[t] = h;
+            }
+        }
+
+        // insert each neighbour of v into the minhash sketch
+        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        {
+            int w = o_Target[j];
+
+            if (visited[w] != bfs_timestamp)
+            {
+                visited[w] = bfs_timestamp;
+                for (int t = 0; t < n_hashes; t++)
+                {
+                    uint32_t h = (*hash_functions[t])(w);
+                    if (h < signature[t])
+                        signature[t] = h;
+                }
+            }
+        }
+    }
+    return signature;
 }
 
 /**
@@ -410,29 +475,6 @@ int Graph_csr<T>::update(int u, int v)
     return n_merge;
 }
 
-// template <class T>
-// int Graph_csr<T>::trivial_update(int u, int v)
-// {
-//     int n_merge = 0;
-
-//     // increment the degree of u
-//     this->o_degree[u]++;
-
-//     this->balls[u].ball2.insert(v);
-//     n_merge++;
-
-//     // for each neighbour w of u
-//     for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
-//     {
-//         int w = this->o_Target[i];
-//         this->balls[w].ball2.insert(v);
-//         this->balls[v].ball2.insert(w);
-//         n_merge += 2;
-//     }
-
-//     return n_merge;
-// }
-
 template <class T>
 void Graph_csr<T>::print_graph(bool doPrintBall)
 {
@@ -528,3 +570,5 @@ void Graph_csr<T>::flush_graph()
         this->balls[i].flush();
     }
 }
+
+#endif
