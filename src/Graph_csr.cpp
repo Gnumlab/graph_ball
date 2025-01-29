@@ -296,20 +296,49 @@ int Graph_csr<T>::bfs_2(int u)
 }
 
 template <class T>
-uint32_t *Graph_csr<T>::computeExactSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions)
+std::vector<int> Graph_csr<T>::ball_2(int u)
+{
+    std::vector<int> ball = std::vector<int>();
+
+    int v, w;
+    bfs_timestamp++;
+
+    visited[u] = bfs_timestamp;
+    ball.push_back(u);
+
+    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    {
+        visited[o_Target[i]] = bfs_timestamp;
+        ball.push_back(o_Target[i]);
+    }
+
+    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    {
+        v = o_Target[i];
+
+        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        {
+            w = o_Target[j];
+            if (visited[w] != bfs_timestamp)
+            {
+                visited[w] = bfs_timestamp;
+                ball.push_back(w);
+            }
+        }
+    }
+
+    return ball;
+}
+
+template <class T>
+uint32_t *Graph_csr<T>::computeExactMHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     // initialize the signature
     uint32_t *signature = new uint32_t[n_hashes];
-    for (int i = 0; i < n_hashes; i++)
-        signature[i] = UINT32_MAX;
 
     // insert u into the minhash sketch
     for (int t = 0; t < n_hashes; t++)
-    {
-        uint32_t h = (*hash_functions[t])(u);
-        if (h < signature[t])
-            signature[t] = h;
-    }
+        signature[t] = (*hash_functions[t])(u);
 
     bfs_timestamp++;
     visited[u] = bfs_timestamp;
@@ -344,6 +373,66 @@ uint32_t *Graph_csr<T>::computeExactSignature(int u, int n_hashes, Hash<uint32_t
                     uint32_t h = (*hash_functions[t])(w);
                     if (h < signature[t])
                         signature[t] = h;
+                }
+            }
+        }
+    }
+    return signature;
+}
+
+template <class T>
+uint32_t *Graph_csr<T>::computeExactOPHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions, int sig_size)
+{
+    // initialize the signature
+    uint32_t *signature = new uint32_t[sig_size];
+    for (int i = 0; i < sig_size; i++)
+        signature[i] = UINT32_MAX;
+
+    int k = sig_size / n_hashes;
+
+    // insert u into the minhash sketch
+    for (int t = 0; t < n_hashes; t++)
+    {
+        uint32_t h = (*hash_functions[t])(u);
+        uint32_t index = h % k + k * t;
+        signature[index] = h;
+    }
+
+    bfs_timestamp++;
+    visited[u] = bfs_timestamp;
+
+    // insert each neighbour of u into the minhash sketch
+    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    {
+
+        int v = o_Target[i];
+
+        if (visited[v] != bfs_timestamp)
+        {
+            visited[v] = bfs_timestamp;
+            for (int t = 0; t < n_hashes; t++)
+            {
+                uint32_t h = (*hash_functions[t])(v);
+                uint32_t index = h % k + k * t;
+                if (h < signature[index])
+                    signature[index] = h;
+            }
+        }
+
+        // insert each neighbour of v into the minhash sketch
+        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        {
+            int w = o_Target[j];
+
+            if (visited[w] != bfs_timestamp)
+            {
+                visited[w] = bfs_timestamp;
+                for (int t = 0; t < n_hashes; t++)
+                {
+                    uint32_t h = (*hash_functions[t])(w);
+                    uint32_t index = h % k + k * t;
+                    if (h < signature[index])
+                        signature[index] = h;
                 }
             }
         }

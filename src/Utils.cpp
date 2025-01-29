@@ -5,6 +5,8 @@
 #include <iostream>
 #include <random>
 #include <fstream>
+#include <unordered_map>
+#include "include/Utils.h"
 
 /**
  * Read the sequence of edges from the given file.
@@ -64,6 +66,73 @@ std::vector<std::pair<int, int>> read_ball_sizes(std::string filename)
     file.close();
 
     return ball_sizes;
+}
+
+/**
+ * Read the minhash signatures from the given file.
+ * The file should contain a list of integers per line, where the first integer is the node id and the following integers are the minhash signatures.
+ * @param filename The name of the file to read the minhash signatures from.
+ * @param sig_size The size of the minhash signatures.
+ * @return A map of integers to arrays of integers, where the key is the node id and the value is the array of minhash signatures.
+ */
+std::vector<std::pair<int, uint32_t *>> read_signatures(std::string filename, int sig_size)
+{
+    std::ifstream file(filename);
+
+    std::vector<std::pair<int, uint32_t *>> signatures;
+    int node;
+
+    while (file >> node)
+    {
+        uint32_t *signature = new uint32_t[sig_size];
+        for (int i = 0; i < sig_size; i++)
+        {
+            file >> signature[i];
+        }
+        signatures.push_back({node, signature});
+    }
+
+    return signatures;
+}
+
+/**
+ * This function reads the balls of radius 2 from the given file.
+ * The file should contain a ball per line, where the first integer is the node id, the second is the size of the ball and the following integers are the nodes in the ball.
+ *
+ * Example:
+ * 1 3 1 3 5
+ * 2 4 2 4 6 7
+ *
+ * @param filename The name of the file to read the balls from.
+ * @return A map of integers to sets of integers, where the key is the node id and the value is the set of nodes in the ball.
+ */
+std::unordered_map<int, std::unordered_set<int>> read_balls(std::string filename)
+{
+    std::ifstream file(filename);
+    std::unordered_map<int, std::unordered_set<int>> balls;
+
+    int node;
+    int size;
+
+    while (file >> node)
+    {
+        file >> size;
+
+        int neighbor;
+        std::unordered_set<int> ball;
+
+        for (int i = 0; i < size; i++)
+        {
+            file >> neighbor;
+            ball.insert(neighbor);
+        }
+
+        balls[node] = ball;
+    }
+
+    file.clear();
+    file.close();
+    return balls;
 }
 
 /* premute the edge set edges. The edge (u, v) in edges is stored as two consecutive integers

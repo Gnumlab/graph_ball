@@ -15,20 +15,78 @@ void computeMinHashSignatures()
       {"soc-youtube-growth", true},
       {"soc-flickr-growth", true},
   };
-  std::vector<int> n_hashes = {2000};
+  int n_hash = 2000;
+
+  for (auto d : dataset)
+    writeMinHashSignatures(d.first, d.second, n_hash, 5000, densities);
+
+  return;
+}
+
+void computeExactBalls()
+{
+  std::vector<float> densities = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+  std::vector<std::pair<std::string, bool>> dataset = {
+      {"comm-linux-kernel-reply", true},
+      {"fb-wosn-friends", false},
+      {"ia-enron-email-all", true},
+      {"soc-youtube-growth", true},
+      {"soc-flickr-growth", true},
+  };
+
+  for (auto d : dataset)
+    writeExactBalls(d.first, d.second, 5000, densities);
+
+  return;
+}
+
+void preprocessPairs(int b, int r, float J)
+{
+  std::vector<std::pair<std::string, bool>> dataset = {
+      {"comm-linux-kernel-reply", true},
+      {"fb-wosn-friends", false},
+      {"ia-enron-email-all", true},
+      {"soc-youtube-growth", true},
+      {"soc-flickr-growth", true},
+  };
+
+  for (auto d : dataset)
+    computePairs(d.first + "_100\%", 2000, b, r, J);
+
+  return;
+}
+
+void preprocessPairs2(float threshold = 0.2, float p = 0.01)
+{
+  std::vector<std::pair<std::string, bool>> dataset = {
+      {"comm-linux-kernel-reply", true},
+      {"fb-wosn-friends", false},
+      {"ia-enron-email-all", true},
+      {"soc-youtube-growth", true},
+      {"soc-flickr-growth", true},
+  };
 
   for (auto d : dataset)
   {
-    for (int n_hash : n_hashes) {
-      writeMinHashSignatures(d.first, d.second, n_hash, 5000, densities);
-    }
+    for (auto density : {"_50\%", "_60\%", "_70\%", "_80\%", "_90\%", "_100\%"})
+      computePairs2(d.first + density, threshold, p);
   }
+
   return;
 }
 
 int main(int argc, char const *argv[])
 {
-  computeMinHashSignatures();
+
+  // computeMinHashSignatures();
+  // computeExactBalls();
+
+  // for j = 0.198 e p = 0.8, or j = 0.236 e p = 0.9
+  // int b = 40;
+  // int r = 2;
+  // preprocessPairs(b, r, 0.2);
+
+  preprocessPairs2();
   return 0;
 
   bool directed = (bool)atoi(argv[2]);

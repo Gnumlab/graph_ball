@@ -81,6 +81,13 @@ public:
     int bfs_2(int u);
 
     /**
+     * This method returns the ball of radius 2 of the given vertex u.
+     * @param u: vertex for which to return the ball of radius 2.
+     * @return: vector containing the vertices in the ball of radius 2 of vertex u.
+     */
+    std::vector<int> ball_2(int u);
+
+    /**
      * This method returns the number of vertices in the graph.
      */
     int getN() const;
@@ -180,7 +187,18 @@ public:
      * @param n_hashes: number of hash functions to use.
      * @param hash_functions: array of hash functions to use.
      */
-    uint32_t *computeExactSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions);
+    uint32_t *computeExactMHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions);
+
+    /**
+     * This method computes few-permutation hashing signatures for the ball of radius 2 of the given vertex u.
+     * It performs a breadth-first search starting from vertex u and stops at distance 2.
+     * The minhash signatures are computed using the given hash functions.
+     * @param u: vertex for which to compute the minhash signatures.
+     * @param n_hashes: number of hash functions to use.
+     * @param hash_functions: array of hash functions to use.
+     * @param sig_size: size of the signature to compute.
+     */
+    uint32_t *computeExactOPHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions, int sig_size);
 
     /**
      * This method updates the graph by adding the edge (u, v) to the graph.
