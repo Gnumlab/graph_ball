@@ -656,8 +656,12 @@ void Graph_csr<T>::flush_graph()
         if (this->directed)
             this->i_degree[i] = 0;
 
+        this->o_red_degree[i] = 0;
         this->balls[i].flush();
+        this->balls[i].insert(i);
+        this->visited[i] = 0;
     }
+    this->bfs_timestamp = 0;
 }
 
 #endif

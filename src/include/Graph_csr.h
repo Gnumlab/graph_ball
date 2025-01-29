@@ -29,7 +29,7 @@ private:
     int *i_degree;     // current in-degree for each vertex v
     int *i_red_degree; // current red in-degree for each vertex v. Red degree is defined as the number of edges not propagated to all v's neighbours
 
-    int gamma, k;
+    int k;
     float phi;
 
     int *queue;

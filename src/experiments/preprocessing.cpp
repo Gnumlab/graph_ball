@@ -58,6 +58,8 @@ std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
 }
 
 /**
+ * TODO: No needed anymore: remove this function
+ * 
  * This function computes the minhash signatures for all the vertices with the top k largest balls of radius 2.
  * More preciselly, the function computes `n_hashes` minhash signatures for the top `topK` vertices with the largest balls of radius 2,
  * considering a snapshot of the graph at different densities specified by the `density` vector.
@@ -358,7 +360,7 @@ void computePairs2(std::string datasetName, float threshold = 0.2, float p = 0.0
         }
     }
     cerr << " [DONE]" << endl;
-    cerr << "Written " << c << " pairs with Jaccard similarity >= 0.2" << endl;
+    cerr << "Written " << c << " pairs with Jaccard similarity >= " << threshold << endl;
 
     file.close();
 }

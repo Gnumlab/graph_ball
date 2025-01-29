@@ -23,6 +23,7 @@ public:
     void push(LazyBall *B);
     int size();
     void print();
+    void flush();
 };
 
 #endif

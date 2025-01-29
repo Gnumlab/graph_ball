@@ -48,6 +48,12 @@ int LazyBall::size()
     return this->ball2.size();
 }
 
+void LazyBall::flush()
+{
+    this->ball1.clear();
+    this->ball2.clear();
+}
+
 void LazyBall::print()
 {
     std::cout << "\tB1: ";

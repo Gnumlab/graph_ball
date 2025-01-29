@@ -75,8 +75,26 @@ void preprocessPairs2(float threshold = 0.2, float p = 0.01)
   return;
 }
 
+void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 10)
+{
+  std::vector<int> ks = {0, 1, 2, 4, 8, 16};
+  std::vector<float> phis = {0.1, 0.2, 0.4, 0.6, 0.8, 1.0};
+  int sample_size = 5000;
+  int n_queries = 1000;
+  float initial_density = 0.2;
+
+  printf("k,phi,timestamp,vertex,ball_size,cumulative_merges\n");
+  explicitBallSize(fname, isDirected, {0}, {0.0}, sample_size, initial_density, n_queries, true);
+  explicitBallSize(fname, isDirected, ks, phis, sample_size, initial_density, n_queries, false);
+}
+
 int main(int argc, char const *argv[])
 {
+
+  std::string filename = argv[1];
+  bool isDirected = (bool)atoi(argv[2]);
+  explicitBallSizeExperiment(filename, isDirected);
+  return 0;
 
   // computeMinHashSignatures();
   // computeExactBalls();
@@ -86,31 +104,24 @@ int main(int argc, char const *argv[])
   // int r = 2;
   // preprocessPairs(b, r, 0.2);
 
-  preprocessPairs2();
-  return 0;
+  // preprocessPairs2();
+  // return 0;
 
-  bool directed = (bool)atoi(argv[2]);
-  std::vector<int> ks = {3, 10};
-  std::vector<float> phis = {0.6, 0.8, 1.0};
-  int n_hashes = 100;
+  // if (argc < 3)
+  // {
+  //   cerr << "Usage: ./build/apps/Graph <filename> <sample_size> [-exact]" << endl;
+  //   return 1;
+  // }
 
-  exit(0);
+  // std::string filename = argv[1];
+  // bool isDirected = true;
+  // int k = 0;
+  // float phi = 1.0;
+  // int sample_size = atoi(argv[2]);
+  // float initial_density = 0.05;
+  // int query_freq = 1000;
+  // bool exactBall = (argc == 4 && strcmp(argv[3], "-exact") == 0);
 
-  if (argc < 3)
-  {
-    cerr << "Usage: ./build/apps/Graph <filename> <sample_size> [-exact]" << endl;
-    return 1;
-  }
-
-  std::string filename = argv[1];
-  bool isDirected = true;
-  int k = 0;
-  float phi = 1.0;
-  int sample_size = atoi(argv[2]);
-  float initial_density = 0.05;
-  int query_freq = 1000;
-  bool exactBall = (argc == 4 && strcmp(argv[3], "-exact") == 0);
-
-  explicitBallSize(filename, isDirected, k, phi, sample_size, initial_density, query_freq, exactBall);
-  return 0;
+  // explicitBallSize(filename, isDirected, k, phi, sample_size, initial_density, query_freq, exactBall);
+  // return 0;
 }
