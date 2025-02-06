@@ -88,12 +88,48 @@ void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 
   explicitBallSize(fname, isDirected, ks, phis, sample_size, initial_density, n_queries, false);
 }
 
+void minhashTimeExperiment(std::string fname, bool isDirected, int n_hashes = 100, int n_run = 10)
+{
+  std::vector<int> ks = {0, 2, 4, 8};
+  std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
+
+  printf("dataset,n,m,k,phi,n_hashes,time\n");
+  for (int i = 0; i < n_run; i++)
+    updatesTime(fname, isDirected, {0}, {0.0}, n_hashes);
+
+  for (int i = 0; i < n_run; i++)
+    updatesTime(fname, isDirected, ks, phis, n_hashes);
+}
+
 int main(int argc, char const *argv[])
 {
+  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality] <dataset> <isDirected> <n_hashes>";
+  if (argc < 2)
+  {
+    cout << usage << endl;
+    return 0;
+  }
 
-  std::string filename = argv[1];
-  bool isDirected = (bool)atoi(argv[2]);
-  explicitBallSizeExperiment(filename, isDirected);
+  std::string experimentType = argv[1];
+
+  if (experimentType == "explicit")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    explicitBallSizeExperiment(filename, isDirected);
+  }
+  else if (experimentType == "minhash-time")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    int n_hashes = atoi(argv[4]);
+    minhashTimeExperiment(filename, isDirected, n_hashes);
+  }
+  else
+  {
+    cout << usage << endl;
+  }
+
   return 0;
 
   // computeMinHashSignatures();

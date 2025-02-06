@@ -137,8 +137,8 @@ void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - start);
             float t = duration.count() / 1000000.0;
 
-            // dataset, n, m, k, phi, n_hashes, time
-            printf("%s,%d,%d,%d,%.3f,%d,%f\n", filename.c_str(), n, m, k, phi, n_hashes, t);
+            // n, m, k, phi, n_hashes, time
+            printf("%d,%d,%d,%.3f,%d,%f\n", n, m, k, phi, n_hashes, t);
         }
     }
 }

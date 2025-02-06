@@ -59,7 +59,7 @@ MinHashBall::~MinHashBall()
 
 /**
  * This method is used to insert the given element v into the ball1 of the current MinHashBall object.
- * @param v: element to be inserted into the ball1 and ball2 of the current MinHashBall object.
+ * @param v: element to be inserted into the ball1 =and ball2= of the current MinHashBall object.
  * @return: void
  */
 void MinHashBall::insert(int v)
@@ -70,9 +70,9 @@ void MinHashBall::insert(int v)
         if (h < this->ball1[i])
             this->ball1[i] = h;
 
-        // TODO: testa rimuovendo questo
-        if (h < this->ball2[i])
-            this->ball2[i] = h;
+        // TODO: check this after updating Graph_csr<MinHashBall> constructor
+        // if (h < this->ball2[i])
+        //     this->ball2[i] = h;
     }
 }
 

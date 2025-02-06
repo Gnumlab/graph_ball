@@ -81,11 +81,14 @@ template <class MinHashBall>
 Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
     : Graph_csr<MinHashBall>(N, M, isDirected, k, phi)
 {
-    for (int i = 0; i < this->n; i++)
+    for (int u = 0; u < this->n; u++)
     {
-        // this->balls[i] = MinHashBall(hash_functions, n_hashes);
-        this->balls[i].init(hash_functions, n_hashes);
-        this->balls[i].insert(i);
+        // this->balls[u] = MinHashBall(hash_functions, n_hashes);
+        this->balls[u].init(hash_functions, n_hashes);
+        this->balls[u].insert(u);
+
+        for (int j = 0; j < n_hashes; j++)
+            this->balls[u].ball2[j] = (*hash_functions[j])(u);
     }
 }
 
