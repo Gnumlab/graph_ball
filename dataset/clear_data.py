@@ -3,20 +3,29 @@ import os
 from collections import defaultdict
 
 if len(sys.argv) < 2:
+    print("Usage: python clear_data.py raw/<dataset_name>.csv [--directed] [--static]")
     exit(0)
 
 FILE_NAME = sys.argv[1]
 IS_DIRECTED = False if len(sys.argv) < 3 else sys.argv[2] == "--directed"
+IS_STATIC = False if len(sys.argv) < 4 else sys.argv[3] == "--static"
 
 # read file
-lines = [
-    tuple(map(int, (u, v, t)))
-    for u, v, o, t in map(lambda x: x.split(), open(FILE_NAME, "r").readlines())
-    if int(o) == 1
-]
+lines = []
+if not IS_STATIC:
+    lines = [
+        tuple(map(int, (u, v, t)))
+        for u, v, o, t in map(lambda x: x.split(), open(FILE_NAME, "r").readlines())
+        if int(o) == 1
+    ]
+    # sort by timestamp
+    lines.sort(key=lambda x: x[2])
+else:
+    lines = [
+        tuple(map(int, (u, v, 0)))
+        for u, v in map(lambda x: x.split(), open(FILE_NAME, "r").readlines())
+    ]
 
-# sort by timestamp
-lines.sort(key=lambda x: x[2])
 
 # normalize node index to start from 0
 id = 0
