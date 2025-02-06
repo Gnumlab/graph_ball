@@ -40,3 +40,7 @@ results/
 *.old
 
 .vscode/
+
+*.gz
+*.zip
+*.tar
