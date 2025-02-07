@@ -661,7 +661,9 @@ void Graph_csr<T>::flush_graph()
 
         this->o_red_degree[i] = 0;
         this->balls[i].flush();
-        this->balls[i].insert(i);
+        <<<<
+        this->balls[i].insert(i); #FOR MinHashBall NEED TO ADD THE REINIT OF BALL2
+        >>>>
         this->visited[i] = 0;
     }
     this->bfs_timestamp = 0;
