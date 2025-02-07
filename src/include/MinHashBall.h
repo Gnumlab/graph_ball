@@ -7,7 +7,7 @@
 
 class MinHashBall : public Ball
 {
-private:
+public:
     uint32_t* ball1;
     uint32_t* ball2;
     Hash<uint32_t>** hash;
