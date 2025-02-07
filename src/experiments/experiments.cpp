@@ -86,6 +86,11 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
             }
         }
     }
+
+    delete[] edges;
+    delete G;
+    delete[] query_vertices;
+
 }
 
 /**
@@ -141,4 +146,12 @@ void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std
             printf("%d,%d,%d,%.3f,%d,%f\n", n, m, k, phi, n_hashes, t);
         }
     }
+
+    delete[] edges;
+    delete G;
+    for (int i = 0; i < n_hashes; i++) {
+        delete hash_functions[i]; // Delete each TabulationHash instance
+    }
+    delete[] hash_functions
+
 }
