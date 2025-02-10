@@ -10,12 +10,12 @@ private:
     /**
      * This is the set containing the vertices at distance 1.
      */
-    std::unordered_set<int> ball1;
+    std::unordered_set<uint32_t> ball1;
 
     /**
      * This is the set containing the vertices at distance 2.
      */
-    std::unordered_set<int> ball2;
+    std::unordered_set<uint32_t> ball2;
 public:
     LazyBall();
     ~LazyBall();
@@ -23,7 +23,7 @@ public:
     void push(LazyBall *B);
     int size();
     void print();
-    void flush();
+    void flush(uint32_t x = UINT32_MAX);
 };
 
 #endif

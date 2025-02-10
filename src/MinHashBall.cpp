@@ -33,15 +33,23 @@ MinHashBall::MinHashBall(Hash<uint32_t> **hash, int k)
     // this->k = k;
 }
 
-void MinHashBall::init(Hash<uint32_t> **hash, int k)
+void MinHashBall::init(Hash<uint32_t> **hash, int k, uint32_t x = UINT32_MAX)
 {
     this->ball1 = new uint32_t[k];
     this->ball2 = new uint32_t[k];
 
     for (int i = 0; i < k; i++)
     {
-        this->ball1[i] = UINT32_MAX;
-        this->ball2[i] = UINT32_MAX;
+        if (x == UINT32_MAX)
+        {
+            this->ball1[i] = UINT32_MAX;
+            this->ball2[i] = UINT32_MAX;
+        }
+        else
+        {
+            this->ball1[i] = (*hash[i])(x);
+            this->ball2[i] = (*hash[i])(x);
+        }
     }
 
     this->hash = hash;
@@ -54,7 +62,7 @@ MinHashBall::~MinHashBall()
     {
         delete[] this->ball1;
         delete[] this->ball2;
-    } 
+    }
 }
 
 /**
@@ -156,11 +164,19 @@ void MinHashBall::print()
     std::cout << std::endl;
 }
 
-void MinHashBall::flush()
+void MinHashBall::flush(uint32_t x = UINT32_MAX)
 {
     for (int i = 0; i < this->k; i++)
     {
-        this->ball1[i] = UINT32_MAX;
-        this->ball2[i] = UINT32_MAX;
+        if (x == UINT32_MAX)
+        {
+            this->ball1[i] = UINT32_MAX;
+            this->ball2[i] = UINT32_MAX;
+        }
+        else
+        {
+            this->ball1[i] = (*this->hash[i])(x);
+            this->ball2[i] = (*this->hash[i])(x);
+        }
     }
 }

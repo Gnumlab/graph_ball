@@ -84,11 +84,7 @@ Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float ph
     for (int u = 0; u < this->n; u++)
     {
         // this->balls[u] = MinHashBall(hash_functions, n_hashes);
-        this->balls[u].init(hash_functions, n_hashes);
-        this->balls[u].insert(u);
-
-        for (int j = 0; j < n_hashes; j++)
-            this->balls[u].ball2[j] = (*hash_functions[j])(u);
+        this->balls[u].init(hash_functions, n_hashes, u);
     }
 }
 
@@ -660,10 +656,7 @@ void Graph_csr<T>::flush_graph()
             this->i_degree[i] = 0;
 
         this->o_red_degree[i] = 0;
-        this->balls[i].flush();
-        <<<<
-        this->balls[i].insert(i); #FOR MinHashBall NEED TO ADD THE REINIT OF BALL2
-        >>>>
+        this->balls[i].flush(i);
         this->visited[i] = 0;
     }
     this->bfs_timestamp = 0;

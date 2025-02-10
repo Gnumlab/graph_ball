@@ -6,8 +6,8 @@
  */
 LazyBall::LazyBall()
 {
-    this->ball1 = std::unordered_set<int>();
-    this->ball2 = std::unordered_set<int>();
+    this->ball1 = std::unordered_set<uint32_t>();
+    this->ball2 = std::unordered_set<uint32_t>();
 }
 
 /**
@@ -35,7 +35,7 @@ void LazyBall::push(LazyBall *B)
 {
     for (int v : B->ball1)
         this->ball2.insert(v);
-        // this->insert(v);
+    // this->insert(v);
 }
 
 /**
@@ -48,10 +48,13 @@ int LazyBall::size()
     return this->ball2.size();
 }
 
-void LazyBall::flush()
+void LazyBall::flush(uint32_t x = UINT32_MAX)
 {
     this->ball1.clear();
     this->ball2.clear();
+
+    if (x != UINT32_MAX)
+        this->insert(x);
 }
 
 void LazyBall::print()
