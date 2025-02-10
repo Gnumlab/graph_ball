@@ -26,9 +26,9 @@ int *read_edges(std::string filename, int *n, int *m)
     file >> *n;
     file >> *m;
 
-    int *edges = new int[2 * (*m)];
+    int *edges = new int[2 * (unsigned int)(*m)];
     int from, to;
-    int i = 0;
+    unsigned int i = 0;
 
     while (file >> from)
     {
