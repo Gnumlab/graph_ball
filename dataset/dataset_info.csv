@@ -1,6 +1,8 @@
-name,vertices,edges,insertion,batches,directed
-comm-linux-kernel-reply,27927,242976,1030000,839643,true
-fb-wosn-friends,63731,817090,1270000,736675,false
-ia-enron-email-all,87273,321918,1130000,214908,true
-soc-youtube-growth,3223589,9376594,12200000,203,true
-soc-flickr-growth,2302925,33140017,33140017,134,true
+name,vertices,edges,insertion,batches,directed,dynamic
+ca-cit-HepTh,22908,2444798,,,true,true
+comm-linux-kernel-reply,27927,242976,1030000,839643,true,true
+fb-wosn-friends,63731,817090,1270000,736675,false,true
+ia-enron-email-all,87273,321918,1130000,214908,true,true
+soc-youtube-growth,3223589,9376594,12200000,203,true,true
+soc-flickr-growth,2302925,33140017,33140017,134,true,true
+com-friend-ster,65608366,1806067135,1806067135,1806067135,false,false
