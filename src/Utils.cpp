@@ -19,16 +19,16 @@
  * @param m A pointer to the number of edges of the graph.
  * @return An array of integers, where each pair of integers represents an edge.
  */
-int *read_edges(std::string filename, int *n, int *m)
+uint32_t *read_edges(std::string filename, uint32_t *n, uint64_t *m)
 {
     std::ifstream file(filename);
 
     file >> *n;
     file >> *m;
 
-    int *edges = new int[2 * (unsigned int)(*m)];
-    int from, to;
-    unsigned int i = 0;
+    uint32_t *edges = new uint32_t[2 * (*m)];
+    uint32_t from, to;
+    uint64_t i = 0;
 
     while (file >> from)
     {

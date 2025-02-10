@@ -33,7 +33,7 @@ Graph_csr<T>::~Graph_csr()
 
 // constructor
 template <class T>
-Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
+Graph_csr<T>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi)
 {
     this->n = N;
     this->m = M * (2 - (int)isDirected);
@@ -41,22 +41,22 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
     this->k = k;
     this->phi = phi;
 
-    this->o_First = new int[this->n];
-    this->o_Target = new int[this->m];
-    this->o_degree = new int[this->n];
-    this->o_red_degree = new int[this->n];
+    this->o_First = new uint64_t[this->n];
+    this->o_Target = new uint32_t[this->m];
+    this->o_degree = new uint32_t[this->n];
+    this->o_red_degree = new uint32_t[this->n];
 
     if (isDirected)
     {
-        this->i_First = new int[this->n];
-        this->i_Target = new int[this->m];
-        this->i_degree = new int[this->n];
-        this->i_red_degree = new int[this->n];
+        this->i_First = new uint64_t[this->n];
+        this->i_Target = new uint32_t[this->m];
+        this->i_degree = new uint32_t[this->n];
+        this->i_red_degree = new uint32_t[this->n];
     }
 
     this->balls = new T[this->n];
 
-    for (int i = 0; i < this->n; i++)
+    for (uint32_t i = 0; i < this->n; i++)
     {
         this->balls[i].insert(i);
         this->o_First[i] = 0;
@@ -71,17 +71,17 @@ Graph_csr<T>::Graph_csr(int N, int M, bool isDirected, int k, float phi)
         }
     }
 
-    this->queue = new int[this->n];
-    this->visited = new int[this->n];
+    this->queue = new uint32_t[this->n];
+    this->visited = new uint32_t[this->n];
 
     this->bfs_timestamp = 0;
 }
 
 template <class MinHashBall>
-Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
+Graph_csr<MinHashBall>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
     : Graph_csr<MinHashBall>(N, M, isDirected, k, phi)
 {
-    for (int u = 0; u < this->n; u++)
+    for (uint32_t u = 0; u < this->n; u++)
     {
         // this->balls[u] = MinHashBall(hash_functions, n_hashes);
         this->balls[u].init(hash_functions, n_hashes, u);
@@ -89,18 +89,18 @@ Graph_csr<MinHashBall>::Graph_csr(int N, int M, bool isDirected, int k, float ph
 }
 
 template <class T>
-void Graph_csr<T>::process_edges(int *edges)
+void Graph_csr<T>::process_edges(uint32_t *edges)
 {
-    int *max_indegree = new int[this->n];  // maximum in degree for each vertex; used to initialize i_First
-    int *max_outdegree = new int[this->n]; // maximum out degree for each vertex; used to initialize o_First
+    uint32_t *max_indegree = new uint32_t[this->n];  // maximum in degree for each vertex; used to initialize i_First
+    uint32_t *max_outdegree = new uint32_t[this->n]; // maximum out degree for each vertex; used to initialize o_First
 
-    for (int i = 0; i < this->n; i++)
+    for (uint32_t i = 0; i < this->n; i++)
     {
         max_indegree[i] = 0;
         max_outdegree[i] = 0;
     }
 
-    for (int i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
+    for (uint64_t i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
     {
         max_outdegree[edges[i]]++;
         if (this->directed)
@@ -110,22 +110,22 @@ void Graph_csr<T>::process_edges(int *edges)
     }
 
     // init i_First and o_First; no need to init the first vertex since it is already initialise
-    for (int i = 1; i < this->n; i++)
+    for (uint32_t i = 1; i < this->n; i++)
     {
         this->o_First[i] = this->o_First[i - 1] + max_outdegree[i - 1];
         if (this->directed)
             this->i_First[i] = this->i_First[i - 1] + max_indegree[i - 1];
     }
 
-    for (int i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
+    for (uint64_t i = 0; i < 2 * this->m / (2 - (int)this->directed); i += 2)
     {
-        int u = edges[i];
-        int v = edges[i + 1];
+        uint32_t u = edges[i];
+        uint32_t v = edges[i + 1];
         // if (!this->check_edge(u, v))
         this->insert_edge(u, v);
     }
 
-    for (int i = 0; i < this->n; i++)
+    for (uint32_t i = 0; i < this->n; i++)
     {
         this->o_degree[i] = 0;
         if (this->directed)
@@ -137,31 +137,31 @@ void Graph_csr<T>::process_edges(int *edges)
 }
 
 template <class T>
-int Graph_csr<T>::getN() const
+uint32_t Graph_csr<T>::getN() const
 {
     return this->n;
 }
 
 template <class T>
-void Graph_csr<T>::setN(int n)
+void Graph_csr<T>::setN(uint32_t n)
 {
     this->n = n;
 }
 
 template <class T>
-int Graph_csr<T>::getM() const
+uint64_t Graph_csr<T>::getM() const
 {
     return this->m;
 }
 
 template <class T>
-void Graph_csr<T>::setM(int m)
+void Graph_csr<T>::setM(uint64_t m)
 {
     this->m = m;
 }
 
 template <class T>
-void Graph_csr<T>::insert_edge(int u, int v)
+void Graph_csr<T>::insert_edge(uint32_t u, uint32_t v)
 {
     // store (u, v) as out edge
     this->o_Target[this->o_First[u] + this->o_degree[u]] = v;
@@ -181,10 +181,10 @@ void Graph_csr<T>::insert_edge(int u, int v)
 }
 
 template <class T>
-bool Graph_csr<T>::check_edge(int u, int v)
+bool Graph_csr<T>::check_edge(uint32_t u, uint32_t v)
 {
     /** che if edge (u, v) already exists. Return the 1 if (u, v) is in G, 0 otherwise */
-    for (int next_u = o_First[u]; next_u < o_First[u] + o_degree[u]; next_u++)
+    for (uint32_t next_u = o_First[u]; next_u < o_First[u] + o_degree[u]; next_u++)
         if (o_Target[next_u] == v)
             return true;
     return false;
@@ -195,8 +195,9 @@ template <class T>
 template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi)
 {
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
     Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi);
     delete[] edges;
     return graph;
@@ -204,7 +205,7 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 
 template <class T>
 template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi)
+Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi)
 {
     Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi);
     graph->process_edges(edges);
@@ -216,8 +217,9 @@ template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
 {
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
     Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, n_hashes, hash_functions);
     delete[] edges;
     return graph;
@@ -225,7 +227,7 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 
 template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
+Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, n_hashes, hash_functions);
     graph->process_edges(edges);
@@ -233,22 +235,22 @@ Graph_csr<T> *Graph_csr<T>::from_edges(int *edges, int n, int m, bool isDirected
 }
 
 template <class T>
-int Graph_csr<T>::bfs_2(int u)
+uint32_t Graph_csr<T>::bfs_2(uint32_t u)
 {
-    int size = o_degree[u] + 1;
-    int v, w;
+    uint32_t size = o_degree[u] + 1;
+    uint32_t v, w;
     bfs_timestamp++;
 
     visited[u] = bfs_timestamp;
 
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
         visited[o_Target[i]] = bfs_timestamp;
 
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
     {
         v = o_Target[i];
 
-        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        for (uint64_t j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
         {
             w = o_Target[j];
             if (visited[w] != bfs_timestamp)
@@ -295,27 +297,27 @@ int Graph_csr<T>::bfs_2(int u)
 }
 
 template <class T>
-std::vector<int> Graph_csr<T>::ball_2(int u)
+std::vector<uint32_t> Graph_csr<T>::ball_2(uint32_t u)
 {
-    std::vector<int> ball = std::vector<int>();
+    std::vector<uint32_t> ball = std::vector<uint32_t>();
 
-    int v, w;
+    uint32_t v, w;
     bfs_timestamp++;
 
     visited[u] = bfs_timestamp;
     ball.push_back(u);
 
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
     {
         visited[o_Target[i]] = bfs_timestamp;
         ball.push_back(o_Target[i]);
     }
 
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
     {
         v = o_Target[i];
 
-        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        for (uint64_t j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
         {
             w = o_Target[j];
             if (visited[w] != bfs_timestamp)
@@ -330,7 +332,7 @@ std::vector<int> Graph_csr<T>::ball_2(int u)
 }
 
 template <class T>
-uint32_t *Graph_csr<T>::computeExactMHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions)
+uint32_t *Graph_csr<T>::computeExactMHSignature(uint32_t u, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     // initialize the signature
     uint32_t *signature = new uint32_t[n_hashes];
@@ -343,10 +345,10 @@ uint32_t *Graph_csr<T>::computeExactMHSignature(int u, int n_hashes, Hash<uint32
     visited[u] = bfs_timestamp;
 
     // insert each neighbour of u into the minhash sketch
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
     {
 
-        int v = o_Target[i];
+        uint32_t v = o_Target[i];
 
         if (visited[v] != bfs_timestamp)
         {
@@ -360,9 +362,9 @@ uint32_t *Graph_csr<T>::computeExactMHSignature(int u, int n_hashes, Hash<uint32
         }
 
         // insert each neighbour of v into the minhash sketch
-        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        for (uint64_t j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
         {
-            int w = o_Target[j];
+            uint32_t w = o_Target[j];
 
             if (visited[w] != bfs_timestamp)
             {
@@ -380,7 +382,7 @@ uint32_t *Graph_csr<T>::computeExactMHSignature(int u, int n_hashes, Hash<uint32
 }
 
 template <class T>
-uint32_t *Graph_csr<T>::computeExactOPHSignature(int u, int n_hashes, Hash<uint32_t> **hash_functions, int sig_size)
+uint32_t *Graph_csr<T>::computeExactOPHSignature(uint32_t u, int n_hashes, Hash<uint32_t> **hash_functions, int sig_size)
 {
     // initialize the signature
     uint32_t *signature = new uint32_t[sig_size];
@@ -401,10 +403,10 @@ uint32_t *Graph_csr<T>::computeExactOPHSignature(int u, int n_hashes, Hash<uint3
     visited[u] = bfs_timestamp;
 
     // insert each neighbour of u into the minhash sketch
-    for (int i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
+    for (uint64_t i = o_First[u]; i < o_First[u] + o_degree[u]; i++)
     {
 
-        int v = o_Target[i];
+        uint32_t v = o_Target[i];
 
         if (visited[v] != bfs_timestamp)
         {
@@ -419,9 +421,9 @@ uint32_t *Graph_csr<T>::computeExactOPHSignature(int u, int n_hashes, Hash<uint3
         }
 
         // insert each neighbour of v into the minhash sketch
-        for (int j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
+        for (uint64_t j = o_First[v]; j < o_First[v] + o_degree[v]; j++)
         {
-            int w = o_Target[j];
+            uint32_t w = o_Target[j];
 
             if (visited[w] != bfs_timestamp)
             {
@@ -445,22 +447,22 @@ uint32_t *Graph_csr<T>::computeExactOPHSignature(int u, int n_hashes, Hash<uint3
  * @return: void
  */
 template <class T>
-int Graph_csr<T>::propagate(int u)
+int Graph_csr<T>::propagate(uint32_t u)
 {
     if (this->directed)
     {
-        for (int i = this->i_First[u]; i < this->i_First[u] + this->i_degree[u]; i++)
+        for (uint64_t i = this->i_First[u]; i < this->i_First[u] + this->i_degree[u]; i++)
         {
-            int v = this->i_Target[i];
+            uint32_t v = this->i_Target[i];
             this->balls[v].push(&this->balls[u]);
         }
         return this->i_degree[u];
     }
     else
     {
-        for (int i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
+        for (uint64_t i = this->o_First[u]; i < this->o_First[u] + this->o_degree[u]; i++)
         {
-            int v = this->o_Target[i];
+            uint32_t v = this->o_Target[i];
             this->balls[v].push(&this->balls[u]);
         }
         return this->o_degree[u];
@@ -480,7 +482,7 @@ void Graph_csr<T>::setK(int k)
 }
 
 template <class T>
-int Graph_csr<T>::update(int u, int v)
+int Graph_csr<T>::update(uint32_t u, uint32_t v)
 {
     int n_merge = 0;
 
@@ -514,16 +516,16 @@ int Graph_csr<T>::update(int u, int v)
         {
             if (!this->directed)
             {
-                int rand_index = this->o_First[u] + (rand() % this->o_degree[u]);
-                int x = this->o_Target[rand_index];
+                uint64_t rand_index = this->o_First[u] + (rand() % this->o_degree[u]);
+                uint32_t x = this->o_Target[rand_index];
                 this->balls[x].push(&this->balls[u]);
             }
             else
             {
                 if (this->i_degree[u] == 0)
                     break;
-                int rand_index = this->i_First[u] + (rand() % this->i_degree[u]);
-                int x = this->i_Target[rand_index];
+                uint64_t rand_index = this->i_First[u] + (rand() % this->i_degree[u]);
+                uint32_t x = this->i_Target[rand_index];
                 this->balls[x].push(&this->balls[u]);
             }
         }
@@ -549,8 +551,8 @@ int Graph_csr<T>::update(int u, int v)
             n_merge += min(this->k, this->o_degree[v]);
             for (int i = 0; i < k; i++)
             {
-                int rand_index = this->o_First[v] + (rand() % this->o_degree[v]);
-                int x = o_Target[rand_index];
+                uint64_t rand_index = this->o_First[v] + (rand() % this->o_degree[v]);
+                uint32_t x = o_Target[rand_index];
                 this->balls[x].push(&this->balls[v]);
             }
         }
@@ -567,15 +569,15 @@ template <class T>
 void Graph_csr<T>::print_graph(bool doPrintBall)
 {
     printf("nv=%d, ne=%d, direct=%d, phi=%.3f, k=%d\n", this->n, this->getM(), this->directed, this->phi, this->k);
-    for (int i = 0; i < this->n; i++)
+    for (uint32_t i = 0; i < this->n; i++)
     {
-        int start = this->o_First[i];
-        int degree = this->o_degree[i];
-        int red_degree = this->o_red_degree[i];
-        int end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
+        uint64_t start = this->o_First[i];
+        uint32_t degree = this->o_degree[i];
+        uint32_t red_degree = this->o_red_degree[i];
+        uint64_t end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
         printf("[%d, d=%d, \033[31mrd=%d\033[0m]:\t", i, degree, red_degree);
 
-        for (int j = start; j < end; j++)
+        for (uint64_t j = start; j < end; j++)
         {
             if (j < start + degree - red_degree)
                 printf("\033[37m%d\033[0m ", this->o_Target[j]);
@@ -591,7 +593,7 @@ void Graph_csr<T>::print_graph(bool doPrintBall)
     if (doPrintBall)
     {
         std::cout << "Balls:" << std::endl;
-        for (int i = 0; i < this->n; i++)
+        for (uint32_t i = 0; i < this->n; i++)
         {
             printf("[%d], size=%d, real_size=%d\n", i, this->balls[i].size(), this->bfs_2(i));
             this->balls[i].print();
@@ -601,16 +603,16 @@ void Graph_csr<T>::print_graph(bool doPrintBall)
 }
 
 template <class T>
-void Graph_csr<T>::print_vertex(int i, bool doPrintBall)
+void Graph_csr<T>::print_vertex(uint32_t i, bool doPrintBall)
 {
     printf("nv=%d, ne=%d, direct=%d, phi=%.3f, k=%d\n", this->n, this->getM(), this->directed, this->phi, this->k);
-    int start = this->o_First[i];
-    int degree = this->o_degree[i];
-    int red_degree = this->o_red_degree[i];
-    int end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
+    uint64_t start = this->o_First[i];
+    uint32_t degree = this->o_degree[i];
+    uint32_t red_degree = this->o_red_degree[i];
+    uint64_t end = i < this->n - 1 ? this->o_First[i + 1] : this->m;
     printf("[%d, d=%d, \033[31mrd=%d\033[0m]:\t", i, degree, red_degree);
 
-    for (int j = start; j < end; j++)
+    for (uint64_t j = start; j < end; j++)
     {
         if (j < start + degree - red_degree)
             printf("\033[37m%d\033[0m ", this->o_Target[j]);
@@ -634,7 +636,7 @@ void Graph_csr<T>::print_vertex(int i, bool doPrintBall)
 template <class T>
 void Graph_csr<T>::fill_graph()
 {
-    int i = 0;
+    uint32_t i = 0;
     for (; i < this->n - 1; i++)
     {
         this->o_degree[i] = this->o_First[i + 1] - this->o_First[i];
@@ -649,7 +651,7 @@ void Graph_csr<T>::fill_graph()
 template <class T>
 void Graph_csr<T>::flush_graph()
 {
-    for (int i = 0; i < this->n; i++)
+    for (uint32_t i = 0; i < this->n; i++)
     {
         this->o_degree[i] = 0;
         if (this->directed)
