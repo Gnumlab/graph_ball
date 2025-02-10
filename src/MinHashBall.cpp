@@ -33,7 +33,7 @@ MinHashBall::MinHashBall(Hash<uint32_t> **hash, int k)
     // this->k = k;
 }
 
-void MinHashBall::init(Hash<uint32_t> **hash, int k, uint32_t x = UINT32_MAX)
+void MinHashBall::init(Hash<uint32_t> **hash, int k, uint32_t x)
 {
     this->ball1 = new uint32_t[k];
     this->ball2 = new uint32_t[k];
@@ -164,7 +164,7 @@ void MinHashBall::print()
     std::cout << std::endl;
 }
 
-void MinHashBall::flush(uint32_t x = UINT32_MAX)
+void MinHashBall::flush(uint32_t x)
 {
     for (int i = 0; i < this->k; i++)
     {

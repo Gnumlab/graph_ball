@@ -49,12 +49,12 @@ uint32_t *read_edges(std::string filename, uint32_t *n, uint64_t *m)
  * @param filename The name of the file to read the ball sizes from.
  * @return A vector of pairs of integers, where the first integer is the node id and the second integer is the size of its ball of radius 2.
  */
-std::vector<std::pair<int, int>> read_ball_sizes(std::string filename)
+std::vector<std::pair<uint32_t, uint32_t>> read_ball_sizes(std::string filename)
 {
     std::ifstream file(filename);
 
-    std::vector<std::pair<int, int>> ball_sizes;
-    int ball, size;
+    std::vector<std::pair<uint32_t, uint32_t>> ball_sizes;
+    uint32_t ball, size;
 
     while (file >> ball)
     {
@@ -75,11 +75,11 @@ std::vector<std::pair<int, int>> read_ball_sizes(std::string filename)
  * @param sig_size The size of the minhash signatures.
  * @return A map of integers to arrays of integers, where the key is the node id and the value is the array of minhash signatures.
  */
-std::vector<std::pair<int, uint32_t *>> read_signatures(std::string filename, int sig_size)
+std::vector<std::pair<uint32_t, uint32_t *>> read_signatures(std::string filename, int sig_size)
 {
     std::ifstream file(filename);
 
-    std::vector<std::pair<int, uint32_t *>> signatures;
+    std::vector<std::pair<uint32_t, uint32_t *>> signatures;
     int node;
 
     while (file >> node)
@@ -106,22 +106,22 @@ std::vector<std::pair<int, uint32_t *>> read_signatures(std::string filename, in
  * @param filename The name of the file to read the balls from.
  * @return A map of integers to sets of integers, where the key is the node id and the value is the set of nodes in the ball.
  */
-std::unordered_map<int, std::unordered_set<int>> read_balls(std::string filename)
+std::unordered_map<uint32_t, std::unordered_set<uint32_t>> read_balls(std::string filename)
 {
     std::ifstream file(filename);
-    std::unordered_map<int, std::unordered_set<int>> balls;
+    std::unordered_map<uint32_t, std::unordered_set<uint32_t>> balls;
 
-    int node;
-    int size;
+    uint32_t node;
+    uint32_t size;
 
     while (file >> node)
     {
         file >> size;
 
-        int neighbor;
-        std::unordered_set<int> ball;
+        uint32_t neighbor;
+        std::unordered_set<uint32_t> ball;
 
-        for (int i = 0; i < size; i++)
+        for (uint32_t i = 0; i < size; i++)
         {
             file >> neighbor;
             ball.insert(neighbor);

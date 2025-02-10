@@ -55,7 +55,7 @@ uint32_t XorIt(uint32_t *sequence, int size)
  * @param b the number of bands
  * @return the candidate pairs
  */
-unordered_set<pair<int, int>, hash_pair> *computeLSH(uint32_t** signatures, int n, int r, int b)
+unordered_set<pair<uint32_t, uint32_t>, hash_pair> *computeLSH(uint32_t** signatures, int n, int r, int b)
 {
     // hash tables for each band
     unordered_multimap<string, int> *H = new unordered_multimap<string, int>[b];
@@ -80,7 +80,7 @@ unordered_set<pair<int, int>, hash_pair> *computeLSH(uint32_t** signatures, int 
         }
     }
 
-    unordered_set<pair<int, int>, hash_pair> *candidatePairs = new unordered_set<pair<int, int>, hash_pair>();
+    unordered_set<pair<uint32_t, uint32_t>, hash_pair> *candidatePairs = new unordered_set<pair<uint32_t, uint32_t>, hash_pair>();
     for (int j = 0; j < b; j++)
     {
         // cout << "Tabella hash: " << j << endl;

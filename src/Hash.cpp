@@ -22,6 +22,7 @@ private:
     T **table;
 
 public:
+    ~TabulationHash();
     TabulationHash();
 };
 
@@ -115,6 +116,8 @@ public:
             for (int j = 0; j < 256; j++)
                 table[i][j] = ((uint64_t)uint_dist(rng) << 32) | uint_dist(rng);
     }
+
+    ~TabulationHash() {}
 
     uint64_t operator()(uint64_t x)
     {

@@ -511,7 +511,7 @@ int Graph_csr<T>::update(uint32_t u, uint32_t v)
     }
     else
     {
-        n_merge += min(this->k, !this->directed ? this->o_degree[u] : this->i_degree[u]);
+        n_merge += min((uint32_t)this->k, !this->directed ? this->o_degree[u] : this->i_degree[u]);
         for (int i = 0; i < this->k; i++)
         {
             if (!this->directed)
@@ -548,7 +548,7 @@ int Graph_csr<T>::update(uint32_t u, uint32_t v)
         }
         else
         {
-            n_merge += min(this->k, this->o_degree[v]);
+            n_merge += min((uint32_t)this->k, this->o_degree[v]);
             for (int i = 0; i < k; i++)
             {
                 uint64_t rand_index = this->o_First[v] + (rand() % this->o_degree[v]);

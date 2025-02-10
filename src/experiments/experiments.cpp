@@ -20,7 +20,7 @@ using namespace std;
  * @param exactBall: boolean indicating if the ball of radius 2 is computed using lazy updates or exact using the BFS algorithm.
  * @return: void
  */
-void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks, std::vector<float> phis, int sample_size, float initial_density = 0.3, int n_queries = 1000, bool exactBall = false)
+void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks, std::vector<float> phis, uint32_t sample_size, float initial_density = 0.3, int n_queries = 1000, bool exactBall = false)
 {
     cerr << "Experiment Parameters" << endl;
     cerr << "Filename: " << filename << endl;
@@ -33,10 +33,11 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
 
     cerr << "Reading graph from file: " << filename << endl;
     Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
-    std::vector<int> *query_vertices = topKBall2(G, sample_size);
+    std::vector<uint32_t> *query_vertices = topKBall2(G, sample_size);
 
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
 
     for (auto phi : phis)
     {
@@ -52,7 +53,7 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
             {
                 // initialize the graph
                 cerr << "Initializing the graph with " << initial_density << " density" << endl;
-                int i = 0;
+                uint64_t i = 0;
                 for (; i < 2 * (m * initial_density); i += 2)
                 {
                     if (!exactBall)
@@ -61,9 +62,9 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
                         G->insert_edge(edges[i], edges[i + 1]);
                 }
 
-                int query_freq = (2 * m - i) / n_queries;
+                uint64_t query_freq = (2 * m - i) / (uint64_t)n_queries;
 
-                int n_merge = 0;
+                uint64_t n_merge = 0;
                 cerr << "\nStarting the experiment" << endl;
                 for (; i < 2 * m; i += 2)
                 {
@@ -74,10 +75,10 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
 
                     if (i % query_freq == 0)
                     {
-                        for (auto u : *query_vertices)
+                        for (uint32_t u : *query_vertices)
                         {
-                            int ball_size = !exactBall ? G->balls[u].size() : G->bfs_2(u);
-                            printf("%d,%.2f,%d,%d,%d,%d\n", k, phi, i / 2, u, ball_size, n_merge);
+                            uint32_t ball_size = !exactBall ? G->balls[u].size() : G->bfs_2(u);
+                            printf("%d,%.2f,%lu,%u,%u,%lu\n", k, phi, i / 2, u, ball_size, n_merge);
                         }
                     }
                 }
@@ -90,7 +91,6 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
     delete[] edges;
     delete G;
     delete[] query_vertices;
-
 }
 
 /**
@@ -100,9 +100,9 @@ void explicitBallSize(std::string filename, bool isDirected, std::vector<int> ks
  * @param edges: array of edges to insert.
  * @return: void
  */
-void executeAllUpdates(Graph_csr<MinHashBall> *G, int m, int *edges)
+void executeAllUpdates(Graph_csr<MinHashBall> *G, uint64_t m, uint32_t *edges)
 {
-    for (int i = 0; i < 2 * m; i += 2)
+    for (uint64_t i = 0; i < 2 * m; i += 2)
         G->update(edges[i], edges[i + 1]);
 }
 
@@ -124,8 +124,9 @@ void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std
 
     Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file(filename, isDirected, 0, 0.0, n_hashes, (Hash<uint32_t> **)hash_functions);
 
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
 
     for (float phi : phis)
     {
@@ -143,15 +144,15 @@ void updatesTime(std::string filename, bool isDirected, std::vector<int> ks, std
             float t = duration.count() / 1000000.0;
 
             // n, m, k, phi, n_hashes, time
-            printf("%d,%d,%d,%.3f,%d,%f\n", n, m, k, phi, n_hashes, t);
+            printf("%u,%lu,%d,%.3f,%d,%f\n", n, m, k, phi, n_hashes, t);
         }
     }
 
     delete[] edges;
     delete G;
-    for (int i = 0; i < n_hashes; i++) {
+    for (int i = 0; i < n_hashes; i++)
+    {
         delete hash_functions[i]; // Delete each TabulationHash instance
     }
-    delete[] hash_functions
-
+    delete[] hash_functions;
 }

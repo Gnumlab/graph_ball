@@ -48,7 +48,7 @@ int LazyBall::size()
     return this->ball2.size();
 }
 
-void LazyBall::flush(uint32_t x = UINT32_MAX)
+void LazyBall::flush(uint32_t x)
 {
     this->ball1.clear();
     this->ball2.clear();

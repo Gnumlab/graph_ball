@@ -15,15 +15,15 @@ void printSortedBallSizes(std::string filename, bool isDirected)
     Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
     G->fill_graph();
 
-    std::vector<std::pair<int, int>> nodes = std::vector<std::pair<int, int>>(G->getN());
-    for (int i = 0; i < G->getN(); i++)
+    std::vector<std::pair<uint32_t, uint32_t>> nodes = std::vector<std::pair<uint32_t, uint32_t>>(G->getN());
+    for (uint32_t i = 0; i < G->getN(); i++)
         nodes[i] = {i, G->bfs_2(i)};
 
     std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
               { return a.second > b.second; });
 
     cout << G->getN() << endl;
-    for (int i = 0; i < G->getN(); i++)
+    for (uint32_t i = 0; i < G->getN(); i++)
         cout << nodes[i].first << " " << nodes[i].second << endl;
 
     delete G;
@@ -37,20 +37,20 @@ void printSortedBallSizes(std::string filename, bool isDirected)
  * @return: vector of k vertices with the largest ball of radius 2.
  */
 template <class T>
-std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
+std::vector<uint32_t> *topKBall2(Graph_csr<T> *G, uint32_t k)
 {
     // Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
     G->fill_graph();
 
-    std::vector<std::pair<int, int>> nodes = std::vector<std::pair<int, int>>(G->getN());
-    for (int i = 0; i < G->getN(); i++)
+    std::vector<std::pair<uint32_t, uint32_t>> nodes = std::vector<std::pair<uint32_t, uint32_t>>(G->getN());
+    for (uint32_t i = 0; i < G->getN(); i++)
         nodes[i] = {i, G->bfs_2(i)};
 
     std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
               { return a.second > b.second; });
 
-    std::vector<int> *result = new std::vector<int>(k);
-    for (int i = 0; i < k; i++)
+    std::vector<uint32_t> *result = new std::vector<uint32_t>(k);
+    for (uint32_t i = 0; i < k; i++)
         (*result)[i] = nodes[i].first;
 
     G->flush_graph();
@@ -76,7 +76,7 @@ std::vector<int> *topKBall2(Graph_csr<T> *G, int k)
  * @param density: vector of densities to consider.
  * @return: void
  */
-void writeMinHashSignatures(std::string datasetName, bool isDirected, int n_hashes, int topK = 1000, std::vector<float> density = {1.0})
+void writeMinHashSignatures(std::string datasetName, bool isDirected, int n_hashes, uint32_t topK = 1000, std::vector<float> density = {1.0})
 {
     srand(time(NULL));
 
@@ -94,28 +94,29 @@ void writeMinHashSignatures(std::string datasetName, bool isDirected, int n_hash
     // Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file(filename, isDirected, 0, 0.0, 0, (Hash<uint32_t> **)hash_functions);
     cerr << " [DONE]" << endl;
 
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
 
     cerr << "Reading ball sizes from file " << ballsFileName << " ...";
-    std::vector<std::pair<int, int>> nodes = read_ball_sizes(ballsFileName);
+    std::vector<std::pair<uint32_t, uint32_t>> nodes = read_ball_sizes(ballsFileName);
     cerr << " [DONE]" << endl;
 
-    for (int i = 0; i < 2 * m; i += 2)
+    for (uint64_t i = 0; i < 2 * m; i += 2)
     {
         // G->update(edges[i], edges[i + 1]);
         G->insert_edge(edges[i], edges[i + 1]);
 
         for (float alpha : density)
         {
-            if (static_cast<int>(m * 2 * alpha) - 2 <= i && i < static_cast<int>(m * 2 * alpha))
+            if (static_cast<uint64_t>(m * 2 * alpha) - 2 <= i && i < static_cast<uint64_t>(m * 2 * alpha))
             {
                 std::string outFileName = "./dataset/data/signatures/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.sig" + std::to_string(n_hashes);
                 std::ofstream file(outFileName);
                 cerr << "Writing signatures for " << alpha << " density" << endl;
                 cerr << "Writing to " << outFileName << " ...";
 
-                for (int u = 0; u < topK; u++)
+                for (uint32_t u = 0; u < topK; u++)
                 {
                     file << nodes[u].first << " ";
                     // uint32_t *signature = G->computeExactOPHSignature(nodes[u].first, n_hashes, (Hash<uint32_t> **)hash_functions, 2000);
@@ -153,7 +154,7 @@ void writeMinHashSignatures(std::string datasetName, bool isDirected, int n_hash
  * @param topK: number of vertices to consider.
  * @param density: vector of densities to consider.
  */
-void writeExactBalls(std::string datasetName, bool isDirected, int topK = 1000, std::vector<float> density = {1.0})
+void writeExactBalls(std::string datasetName, bool isDirected, uint32_t topK = 1000, std::vector<float> density = {1.0})
 {
     srand(time(NULL));
 
@@ -166,20 +167,21 @@ void writeExactBalls(std::string datasetName, bool isDirected, int topK = 1000, 
     Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file(filename, isDirected, 0, 0.0, 0, nullptr);
     cerr << " [DONE]" << endl;
 
-    int n, m;
-    int *edges = read_edges(filename, &n, &m);
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
 
     cerr << "Reading ball sizes from file " << ballsFileName << " ...";
-    std::vector<std::pair<int, int>> nodes = read_ball_sizes(ballsFileName);
+    std::vector<std::pair<uint32_t, uint32_t>> nodes = read_ball_sizes(ballsFileName);
     cerr << " [DONE]" << endl;
 
-    for (int i = 0; i < 2 * m; i += 2)
+    for (uint64_t i = 0; i < 2 * m; i += 2)
     {
         G->insert_edge(edges[i], edges[i + 1]);
 
         for (float alpha : density)
         {
-            if (static_cast<int>(m * 2 * alpha) - 2 <= i && i < static_cast<int>(m * 2 * alpha))
+            if (static_cast<uint64_t>(m * 2 * alpha) - 2 <= i && i < static_cast<uint64_t>(m * 2 * alpha))
             {
                 std::string outFileName = "./dataset/data/balls/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.balls";
                 std::ofstream file(outFileName);
@@ -187,12 +189,12 @@ void writeExactBalls(std::string datasetName, bool isDirected, int topK = 1000, 
                 cerr << "Writing balls for " << alpha << " density" << endl;
                 cerr << "Writing to " << outFileName << " ...";
 
-                for (int u = 0; u < topK; u++)
+                for (uint32_t u = 0; u < topK; u++)
                 {
                     file << nodes[u].first << " ";
-                    std::vector<int> ball = G->ball_2(nodes[u].first);
+                    std::vector<uint32_t> ball = G->ball_2(nodes[u].first);
                     file << ball.size() << " ";
-                    for (int j = 0; j < ball.size(); j++)
+                    for (uint32_t j = 0; j < ball.size(); j++)
                         file << ball[j] << " ";
                     file << std::endl;
                 }
@@ -218,19 +220,19 @@ void writeExactBalls(std::string datasetName, bool isDirected, int topK = 1000, 
  * @param b: second set.
  * @return: size of the intersection of the two sets.
  */
-int size_intersection(std::unordered_set<int> *a, std::unordered_set<int> *b)
+uint32_t size_intersection(std::unordered_set<uint32_t> *a, std::unordered_set<uint32_t> *b)
 {
     int size = 0;
 
     if (a->size() < b->size())
     {
-        for (int x : *a)
+        for (uint32_t x : *a)
             if (b->find(x) != b->end())
                 size++;
     }
     else
     {
-        for (int x : *b)
+        for (uint32_t x : *b)
             if (a->find(x) != a->end())
                 size++;
     }
@@ -243,7 +245,7 @@ int size_intersection(std::unordered_set<int> *a, std::unordered_set<int> *b)
  * @param b: second set.
  * @return: Jaccard similarity between the two sets.
  */
-float jaccard_similarity(std::unordered_set<int> *a, std::unordered_set<int> *b)
+float jaccard_similarity(std::unordered_set<uint32_t> *a, std::unordered_set<uint32_t> *b)
 {
     int intersection = size_intersection(a, b);
     return (float)intersection / (a->size() + b->size() - intersection);
@@ -255,7 +257,7 @@ void computePairs(std::string datasetName, int sig_size, int b, int r, float J)
     std::string filename = "./dataset/data/signatures/" + datasetName + ".sig" + std::to_string(sig_size);
 
     cerr << "Reading signatures from " << filename << " ...";
-    std::vector<std::pair<int, uint32_t *>> signatures = read_signatures(filename, sig_size);
+    std::vector<std::pair<uint32_t, uint32_t *>> signatures = read_signatures(filename, sig_size);
     int n = signatures.size();
 
     uint32_t **signaturesArray = new uint32_t *[signatures.size()];
@@ -265,7 +267,7 @@ void computePairs(std::string datasetName, int sig_size, int b, int r, float J)
          << endl;
 
     cerr << "Computing LSH for " << n << " signatures ..." << endl;
-    std::unordered_set<std::pair<int, int>, hash_pair> *pairs = computeLSH(signaturesArray, n, r, b);
+    std::unordered_set<std::pair<uint32_t, uint32_t>, hash_pair> *pairs = computeLSH(signaturesArray, n, r, b);
     cerr << " [DONE]" << endl;
     cerr << "Computed " << pairs->size() << " pairs\n"
          << endl;
@@ -280,11 +282,11 @@ void computePairs(std::string datasetName, int sig_size, int b, int r, float J)
     std::ofstream file(outFileName);
 
     cerr << "Writing pairs to " << outFileName << " ...";
-    int c = 0;
+    uint64_t c = 0;
     for (auto pair : *pairs)
     {
-        int b1 = signatures[pair.first].first;
-        int b2 = signatures[pair.second].first;
+        uint32_t b1 = signatures[pair.first].first;
+        uint32_t b2 = signatures[pair.second].first;
         float j_sim = jaccard_similarity(&balls[b1], &balls[b2]);
         if (j_sim >= J)
         {
@@ -335,8 +337,8 @@ void computePairs2(std::string datasetName, float threshold = 0.2, float p = 0.0
     std::ofstream file(outFileName);
 
     cerr << "Writing pairs to " << outFileName << " ..." << endl;
-    int c = 0;
-    int i = 0;
+    uint64_t c = 0;
+    uint32_t i = 0;
 
     for (auto itr = balls.begin(); itr != balls.end(); itr++)
     {
