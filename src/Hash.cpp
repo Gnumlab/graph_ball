@@ -22,8 +22,8 @@ private:
     T **table;
 
 public:
-    ~TabulationHash();
     TabulationHash();
+    ~TabulationHash();
 };
 
 // template <>
@@ -89,7 +89,7 @@ public:
         new (this) TabulationHash(UINT32_MAX);
     }
 
-    ~TabulationHash() {}
+    virtual ~TabulationHash() {}
 
     uint32_t operator()(uint32_t x)
     {
@@ -117,7 +117,7 @@ public:
                 table[i][j] = ((uint64_t)uint_dist(rng) << 32) | uint_dist(rng);
     }
 
-    ~TabulationHash() {}
+    virtual ~TabulationHash() {}
 
     uint64_t operator()(uint64_t x)
     {
