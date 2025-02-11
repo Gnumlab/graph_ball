@@ -80,3 +80,13 @@ void KMVCounter<T>::merge(KMVCounter<T> *other)
 
     this->max_index = this->k - 1;
 }
+
+template <typename T>
+void KMVCounter<T>::flush()
+{
+    for (uint16_t i = 0; i < this->k; i++)
+    {
+        this->values[i] = std::numeric_limits<T>::max();
+    }
+    this->max_index = 0;
+}
