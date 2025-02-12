@@ -72,7 +72,8 @@ public:
      */
     Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions);
 
-    Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size);
+    template <typename U = T, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type = 0>
+    Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size, TabulationHash<uint32_t> *hash);
 
     bool check_edge(uint32_t u, uint32_t v);
 
@@ -121,6 +122,10 @@ public:
     void setThreshold(float phi);
 
     void setK(int k);
+
+    void setHashes(Hash<uint32_t> **hash_functions);
+
+    void setHash(TabulationHash<uint32_t> *hash);
 
     /**
      * This method inserts the edge (u, v) into the graph.
@@ -194,7 +199,7 @@ public:
      * @return: Graph_csr object representing the graph read from the file.
      */
     template <typename U = T, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type = 0>
-    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0);
+    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0, TabulationHash<uint32_t> *hash = NULL);
 
     /**
      * This method reads the graph from the given edges and returns a Graph_csr<KMVBall> object.
@@ -208,7 +213,7 @@ public:
      * @return: Graph_csr object representing the graph read from the edges.
      */
     template <typename U = T, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type = 0>
-    static Graph_csr<T> *from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0);
+    static Graph_csr<T> *from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0, TabulationHash<uint32_t> *hash = NULL);
 
     /**
      * This method computes minhash signatures for the ball of radius 2 of the given vertex u.

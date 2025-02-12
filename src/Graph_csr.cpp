@@ -86,12 +86,11 @@ Graph_csr<MinHashBall>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k
     }
 }
 
-template <>
-Graph_csr<KMVBall<uint32_t>>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size)
-    : Graph_csr<KMVBall<uint32_t>>(N, M, isDirected, k, phi)
+template <class T>
+template <typename U, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type>
+Graph_csr<T>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size, TabulationHash<uint32_t> *hash)
+    : Graph_csr<T>(N, M, isDirected, k, phi)
 {
-
-    TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
     for (uint32_t u = 0; u < this->n; u++)
     {
         this->balls[u].init(hash, counter_size, u);
@@ -247,21 +246,21 @@ Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, 
 // implemntation for KMVBall
 template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, uint16_t counter_size)
+Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, uint16_t counter_size, TabulationHash<uint32_t> *hash)
 {
     uint32_t n;
     uint64_t m;
     uint32_t *edges = read_edges(filename, &n, &m);
-    Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, counter_size);
+    Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, counter_size, hash);
     delete[] edges;
     return graph;
 }
 
 template <class T>
 template <typename U, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type>
-Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi, uint16_t counter_size)
+Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi, uint16_t counter_size, TabulationHash<uint32_t> *hash)
 {
-    Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, counter_size);
+    Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, counter_size, hash);
     graph->process_edges(edges);
     return graph;
 }

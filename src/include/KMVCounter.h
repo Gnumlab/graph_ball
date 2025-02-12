@@ -12,7 +12,6 @@ class KMVCounter
 
 private:
     T *values;
-    uint16_t max_index;
     TabulationHash<T> *h;
     uint16_t k;
 

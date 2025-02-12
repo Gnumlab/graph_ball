@@ -13,6 +13,7 @@ class Hash
 {
 public:
     virtual T operator()(T x) = 0;
+    void reset() {};
 };
 
 template <class T>
@@ -76,12 +77,7 @@ private:
 public:
     TabulationHash(uint32_t U) : U(U)
     {
-        std::random_device rd; // Obtain a random seed from the hardware
-        RNG rng(rd());
-        std::uniform_int_distribution<uint32_t> uint_dist(0, U); // by default range [0, MAX]
-        for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 16; j++)
-                table[i][j] = uint_dist(rng);
+        this->reset();
     }
 
     TabulationHash()
@@ -90,6 +86,16 @@ public:
     }
 
     virtual ~TabulationHash() {}
+
+    void reset()
+    {
+        std::random_device rd; // Obtain a random seed from the hardware
+        RNG rng(rd());
+        std::uniform_int_distribution<uint32_t> uint_dist(0, this->U); // by default range [0, MAX]
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 16; j++)
+                table[i][j] = uint_dist(rng);
+    }
 
     uint32_t operator()(uint32_t x)
     {
@@ -109,6 +115,13 @@ private:
 public:
     TabulationHash()
     {
+        this->reset();
+    }
+
+    virtual ~TabulationHash() {}
+
+    void reset()
+    {
         std::random_device rd;                             // Obtain a random seed from the hardware
         RNG rng(rd());                                     // Create a generator instance with the seed
         std::uniform_int_distribution<uint32_t> uint_dist; // by default range [0, MAX]
@@ -116,8 +129,6 @@ public:
             for (int j = 0; j < 256; j++)
                 table[i][j] = ((uint64_t)uint_dist(rng) << 32) | uint_dist(rng);
     }
-
-    virtual ~TabulationHash() {}
 
     uint64_t operator()(uint64_t x)
     {

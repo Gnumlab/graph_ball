@@ -61,7 +61,10 @@ KMVBall<T>::~KMVBall()
 template <typename T>
 void KMVBall<T>::insert(uint32_t v)
 {
-    this->ball1->add(v);
+    if (this->ball1 != nullptr)
+    {
+        this->ball1->add(v);
+    }
     // TODO: check this after updating Graph_csr<KMVBall> constructor
     // this->ball2->add(v);
 }
@@ -96,4 +99,3 @@ void KMVBall<T>::flush(uint32_t x)
     this->ball1->add(x);
     this->ball2->add(x);
 }
-

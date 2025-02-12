@@ -81,6 +81,7 @@ void preprocessPairs2(float threshold = 0.2, float p = 0.01)
 
 void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 10)
 {
+  srand(time(NULL));
   std::vector<int> ks = {0, 1, 2, 4, 8, 16};
   std::vector<float> phis = {0.1, 0.2, 0.4, 0.6, 0.8, 1.0};
   int sample_size = 5000;
@@ -89,50 +90,43 @@ void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 
 
   printf("k,phi,timestamp,vertex,ball_size,cumulative_merges\n");
   explicitBallSize(fname, isDirected, {0}, {0.0}, sample_size, initial_density, n_queries, true);
-  explicitBallSize(fname, isDirected, ks, phis, sample_size, initial_density, n_queries, false);
+  explicitBallSize(fname, isDirected, ks, phis, sample_size, initial_density, n_queries, false, n_run);
 }
 
-void minhashTimeExperiment(std::string fname, bool isDirected, int n_hashes = 100, int n_run = 10)
+void minhashTimeExperiment(std::string fname, bool isDirected, int n_hashes = 100, int n_runs = 10)
 {
   std::vector<int> ks = {0, 2, 4, 8};
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
 
-  printf("dataset,n,m,k,phi,n_hashes,time\n");
-  for (int i = 0; i < n_run; i++)
-    updatesTime(fname, isDirected, {0}, {0.0}, n_hashes);
-
-  for (int i = 0; i < n_run; i++)
-    updatesTime(fname, isDirected, ks, phis, n_hashes);
+  printf("n,m,k,phi,n_hashes,time\n");
+  updatesTimeMinHashBall(fname, isDirected, ks, phis, n_hashes, n_runs);
+  updatesTimeMinHashBall(fname, isDirected, {0}, {0.0}, n_hashes, n_runs);
 }
 
-void testHLL()
+void kmvCounterTimeExperiment(std::string fname, bool isDirected, uint16_t counter_size = 32, int n_run = 10)
 {
-  srand(time(NULL));
+  std::vector<int> ks = {0, 2, 4, 8};
+  std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
 
-  uint32_t N = 1 << 16;
-  uint32_t n_counter = 100;
-  uint8_t b = 8;
+  printf("n,m,k,phi,counter_size,time\n");
+  updatesTimeKMVBall(fname, isDirected, ks, phis, counter_size, 1);
+  updatesTimeKMVBall(fname, isDirected, {0}, {0.0}, counter_size, n_run);
+}
 
-  TabulationHash<uint64_t> **hashes = new TabulationHash<uint64_t> *[n_counter];
-  for (uint32_t i = 0; i < n_counter; i++)
-    hashes[i] = new TabulationHash<uint64_t>();
+void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint16_t counter_size = 32, int n_run = 10)
+{
+  std::vector<int> ks = {0, 2, 4, 8};
+  std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
+  std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9};
 
-  HLLCounter *hll = new HLLCounter(n_counter, b, hashes);
-
-  for (uint64_t i = 0; i < N; i++)
-    hll->add(i);
-
-  cout << N << endl;
-  cout << hll->size() << endl;
-  cout << (long long)N - (long long)hll->size() << endl;
-  return;
+  sizeEstimationExperiment(datasetName, isDirected, ks, phis, timeStamps, counter_size, n_run);
 }
 
 template <typename T>
 void testKMV(int k)
 {
   srand(time(NULL));
-  uint32_t N = 1 << 12;
+  uint32_t N = 1 << 24;
 
   int n_runs = 100;
   float size_esitmation = 0.0;
@@ -169,7 +163,8 @@ void testKMV(int k)
 
 int main(int argc, char const *argv[])
 {
-  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality] <dataset> <isDirected> <n_hashes>";
+
+  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
     cout << usage << endl;
@@ -190,6 +185,13 @@ int main(int argc, char const *argv[])
     bool isDirected = (bool)atoi(argv[3]);
     int n_hashes = atoi(argv[4]);
     minhashTimeExperiment(filename, isDirected, n_hashes);
+  }
+  else if (experimentType == "counter-time")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    uint16_t counter_size = atoi(argv[4]);
+    kmvCounterTimeExperiment(filename, isDirected, counter_size);
   }
   else
   {
