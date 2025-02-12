@@ -103,12 +103,12 @@ void MinHashBall::push(MinHashBall *B)
  * This method estimates the size of the ball2 of the current MinHashBall object using Flajolet-Martin estimation.
  * @return: estimated size of the ball2 of the current MinHashBall object.
  */
-int MinHashBall::size()
+uint32_t MinHashBall::size()
 {
     float size = 0.0;
     for (int i = 0; i < this->k; i++)
         size += (float)UINT32_MAX / (float)this->ball2[i] - 1;
-    return static_cast<int>(size / (float)this->k);
+    return static_cast<uint32_t>(size / (float)this->k);
 }
 
 /**

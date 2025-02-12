@@ -21,7 +21,7 @@ public:
     ~LazyBall();
     void insert(int v);
     void push(LazyBall *B);
-    int size();
+    uint32_t size();
     void print();
     void flush(uint32_t x = UINT32_MAX);
 };

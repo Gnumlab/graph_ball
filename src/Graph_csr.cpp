@@ -7,8 +7,6 @@
 
 #include "include/Utils.h"
 #include "include/Graph_csr.h"
-// #include "include/MinHashBall.h"
-// #include "Hash.cpp"
 
 template <class T>
 Graph_csr<T>::~Graph_csr()
@@ -85,6 +83,18 @@ Graph_csr<MinHashBall>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k
     {
         // this->balls[u] = MinHashBall(hash_functions, n_hashes);
         this->balls[u].init(hash_functions, n_hashes, u);
+    }
+}
+
+template <>
+Graph_csr<KMVBall<uint32_t>>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size)
+    : Graph_csr<KMVBall<uint32_t>>(N, M, isDirected, k, phi)
+{
+
+    TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
+    for (uint32_t u = 0; u < this->n; u++)
+    {
+        this->balls[u].init(hash, counter_size, u);
     }
 }
 
@@ -190,9 +200,9 @@ bool Graph_csr<T>::check_edge(uint32_t u, uint32_t v)
     return false;
 }
 
-// implemntation for any class T that is not MinHashBall
+// implemntation for LazyBall
 template <class T>
-template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
+template <typename U, typename std::enable_if<std::is_same<U, LazyBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi)
 {
     uint32_t n;
@@ -204,7 +214,7 @@ Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int
 }
 
 template <class T>
-template <typename U, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type>
+template <typename U, typename std::enable_if<std::is_same<U, LazyBall>::value, int>::type>
 Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi)
 {
     Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi);
@@ -230,6 +240,28 @@ template <typename U, typename std::enable_if<std::is_same<U, MinHashBall>::valu
 Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions)
 {
     Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, n_hashes, hash_functions);
+    graph->process_edges(edges);
+    return graph;
+}
+
+// implemntation for KMVBall
+template <class T>
+template <typename U, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type>
+Graph_csr<T> *Graph_csr<T>::from_file(std::string filename, bool isDirected, int k, float phi, uint16_t counter_size)
+{
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(filename, &n, &m);
+    Graph_csr<T> *graph = Graph_csr<T>::from_edges(edges, n, m, isDirected, k, phi, counter_size);
+    delete[] edges;
+    return graph;
+}
+
+template <class T>
+template <typename U, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type>
+Graph_csr<T> *Graph_csr<T>::from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k, float phi, uint16_t counter_size)
+{
+    Graph_csr<T> *graph = new Graph_csr<T>(n, m, isDirected, k, phi, counter_size);
     graph->process_edges(edges);
     return graph;
 }

@@ -4,6 +4,8 @@
 #include <string>
 #include "../Hash.cpp"
 #include "MinHashBall.h"
+#include "LazyBall.h"
+#include "KMVBall.h"
 
 template <class T>
 class Graph_csr
@@ -70,6 +72,8 @@ public:
      */
     Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, int n_hashes, Hash<uint32_t> **hash_functions);
 
+    Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float phi, uint16_t counter_size);
+
     bool check_edge(uint32_t u, uint32_t v);
 
     /**
@@ -127,18 +131,19 @@ public:
     void insert_edge(uint32_t u, uint32_t v);
 
     /**
-     * This method reads the graph from the given file and returns a Graph_csr object.
+     * This method reads the graph from the given file and returns a Graph_csr<LazyBall> object.
      * @param filename: name of the file containing the graph.
      * @param isDirected: boolean value indicating whether the graph is directed or not.
      * @param k: number of nodes to sample when updating the graph.
      * @param phi: threshold value for the red degree of a vertex.
      * @return: Graph_csr object representing the graph read from the file.
      */
-    template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
+    // template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
+    template <typename U = T, typename std::enable_if<std::is_same<U, LazyBall>::value, int>::type = 0>
     static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0);
 
     /**
-     * This method reads the graph from the given edges and returns a Graph_csr object.
+     * This method reads the graph from the given edges and returns a Graph_csr<LazyBall> object.
      * @param edges: array containing the edges of the graph.
      * @param n: number of vertices in the graph.
      * @param m: number of edges in the graph.
@@ -147,7 +152,8 @@ public:
      * @param phi: threshold value for the red degree of a vertex.
      * @return: Graph_csr object representing the graph read from the edges.
      */
-    template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
+    // template <typename U = T, typename std::enable_if<!std::is_same<U, MinHashBall>::value, int>::type = 0>
+    template <typename U = T, typename std::enable_if<std::is_same<U, LazyBall>::value, int>::type = 0>
     static Graph_csr<T> *from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k = 0, float phi = 0.0);
 
     /**
@@ -177,6 +183,32 @@ public:
      */
     template <typename U = T, typename std::enable_if<std::is_same<U, MinHashBall>::value, int>::type = 0>
     static Graph_csr<T> *from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k = 0, float phi = 0.0, int n_hashes = 0, Hash<uint32_t> **hash_functions = NULL);
+
+    /**
+     * This method reads the graph from the given file and returns a Graph_csr<KMVBall> object.
+     * @param filename: name of the file containing the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @param counter_size: size of the counter used in the KMVBall objects.
+     * @return: Graph_csr object representing the graph read from the file.
+     */
+    template <typename U = T, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type = 0>
+    static Graph_csr<T> *from_file(std::string filename, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0);
+
+    /**
+     * This method reads the graph from the given edges and returns a Graph_csr<KMVBall> object.
+     * @param edges: array containing the edges of the graph.
+     * @param n: number of vertices in the graph.
+     * @param m: number of edges in the graph.
+     * @param isDirected: boolean value indicating whether the graph is directed or not.
+     * @param k: number of nodes to sample when updating the graph.
+     * @param phi: threshold value for the red degree of a vertex.
+     * @param counter_size: size of the counter used in the KMVBall objects.
+     * @return: Graph_csr object representing the graph read from the edges.
+     */
+    template <typename U = T, typename std::enable_if<std::is_same<U, KMVBall<uint32_t>>::value, int>::type = 0>
+    static Graph_csr<T> *from_edges(uint32_t *edges, uint32_t n, uint64_t m, bool isDirected, int k = 0, float phi = 0.0, uint16_t counter_size = 0);
 
     /**
      * This method computes minhash signatures for the ball of radius 2 of the given vertex u.

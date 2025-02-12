@@ -6,7 +6,7 @@
 #include "../Hash.cpp"
 
 template <typename T>
-class KMVBall : public Ball<T>
+class KMVBall : public Ball
 {
 public:
     KMVCounter<T> *ball1;
@@ -16,9 +16,9 @@ public:
 
 public:
     KMVBall();
-    KMVBall(TabulationHash<T> *hash, int k);
+    KMVBall(TabulationHash<T> *hash, uint16_t k);
     ~KMVBall();
-    void init(TabulationHash<T> *hash, int k, uint32_t x = UINT32_MAX);
+    void init(TabulationHash<T> *hash, uint16_t k, uint32_t x = UINT32_MAX);
     void insert(uint32_t v);
     void push(KMVBall *B);
     uint32_t size();

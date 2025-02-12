@@ -20,7 +20,7 @@ public:
     void init(Hash<uint32_t> **hash, int k, uint32_t x = UINT32_MAX);
     void insert(int v);
     void push(MinHashBall *B);
-    int size();
+    uint32_t size();
     static float similarity(MinHashBall *B1, MinHashBall *B2);
     uint32_t *getSignature();
     void print();

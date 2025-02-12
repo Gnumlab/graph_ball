@@ -43,7 +43,7 @@ void LazyBall::push(LazyBall *B)
  * It returns the number of elements in the ball2 only since ball1 is always a subset of ball2.
  * @return: size of the ball2 of the current LazyBall object.
  */
-int LazyBall::size()
+uint32_t LazyBall::size()
 {
     return this->ball2.size();
 }

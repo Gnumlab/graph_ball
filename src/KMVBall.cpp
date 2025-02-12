@@ -22,21 +22,21 @@ KMVBall<T>::KMVBall()
  * @param k: number of hash functions used to hash the vertices.
  */
 template <typename T>
-KMVBall<T>::KMVBall(TabulationHash<T> *hash, int k)
+KMVBall<T>::KMVBall(TabulationHash<T> *hash, uint16_t k)
 {
     this->init(hash, k);
 }
 
 template <typename T>
-void KMVBall<T>::init(TabulationHash<T> *hash, int k, uint32_t x)
+void KMVBall<T>::init(TabulationHash<T> *hash, uint16_t k, uint32_t x)
 {
     this->ball1 = new KMVCounter<T>(k, hash);
     this->ball2 = new KMVCounter<T>(k, hash);
 
     if (x != UINT32_MAX)
     {
-        this->ball1[i]->add(x);
-        this->ball2[i]->add(x);
+        this->ball1->add(x);
+        this->ball2->add(x);
     }
 
     this->hash = hash;
