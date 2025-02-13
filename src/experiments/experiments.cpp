@@ -248,6 +248,7 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
     TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
     Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_file(fileName, isDirected, 0, 0.0, counter_size, hash);
 
+    std::cerr<<G->balls[1].size()<<std::endl;
     uint64_t i = 0;
     for (int j = 0; j < timeStamps.size(); j++)
     {
@@ -268,7 +269,6 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
 
     for (int l = 0; l < sample_size; l++)
     {
-        uint32_t u = balls[l].first;
         uint32_t ball_size = balls[l].second;
         sizes[timeStamps.size()][l] = ball_size;
     }
