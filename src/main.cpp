@@ -113,7 +113,7 @@ void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint1
   std::vector<int> ks = {0, 2, 4, 8};
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
   std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9};
-
+  printf("alpha,k,phi,u,ball_size,effective_size\n");
   sizeEstimationExperiment(datasetName, isDirected, ks, phis, timeStamps, counter_size, n_run);
 }
 
