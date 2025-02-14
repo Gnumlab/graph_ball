@@ -147,7 +147,7 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
     else size = kmv->size();
     
     size_esitmation += size;
-    error += abs((float)size - (float)N*0.1) / (float)(N*0.1);
+    error += abs((float)size - (float)N) / (float)(N);
   }
 
   float avg_size = (float)size_esitmation / (float)n_runs;
