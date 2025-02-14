@@ -119,6 +119,7 @@ void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint1
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
   std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9};
 
+  printf("density,k,phi,u,ball_apx,ball_exact\n");
   sizeEstimationExperiment(datasetName, isDirected, ks, phis, timeStamps, counter_size, n_run);
 }
 
@@ -163,6 +164,10 @@ void testKMV(int k)
 
 int main(int argc, char const *argv[])
 {
+  // testKMV<uint32_t>(8);
+  // testKMV<uint32_t>(16);
+  // testKMV<uint32_t>(32);
+  // exit(0);
 
   std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
@@ -192,6 +197,13 @@ int main(int argc, char const *argv[])
     bool isDirected = (bool)atoi(argv[3]);
     uint16_t counter_size = atoi(argv[4]);
     kmvCounterTimeExperiment(filename, isDirected, counter_size);
+  }
+  else if (experimentType == "counter-quality")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    uint16_t counter_size = atoi(argv[4]);
+    kmvCounterQualityExperiment(filename, isDirected, counter_size);
   }
   else
   {
