@@ -118,16 +118,16 @@ void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint1
 }
 
 template <typename T>
-void testKMV(int k)
+void testKMV(int k, int runs = 10, bool use_old = 0)
 {
   srand(time(NULL));
   uint32_t N = 1 << 24;
 
-  int n_runs = 100;
+  int n_runs = runs;
   float size_esitmation = 0.0;
   float error = 0.0;
 
-  printf("KMVCounter<%s>\n", typeid(T).name() == typeid(uint32_t).name() ? "uint32_t" : "uint64_t");
+  printf("KMVCounter<%s>_%d\n", typeid(T).name() == typeid(uint32_t).name() ? "uint32_t" : "uint64_t", use_old);
   printf("\truns: %d\n\tk: %d\n", n_runs, k);
 
   for (int j = 0; j < n_runs; j++)
@@ -137,11 +137,17 @@ void testKMV(int k)
     KMVCounter<T> *kmv = new KMVCounter<T>(k, h);
 
     for (uint32_t i = 0; i < N; i++)
-      kmv->add(i);
+    {
+       if (use_old)kmv->add_old(i);
+       else kmv->add(i);
+    }
 
-    uint32_t size = kmv->size();
+    uint32_t size;
+    if(use_old) size = kmv->size_old();
+    else size = kmv->size();
+    
     size_esitmation += size;
-    error += abs((float)size - (float)N) / (float)N;
+    error += abs((float)size - (float)N*0.1) / (float)(N*0.1);
   }
 
   float avg_size = (float)size_esitmation / (float)n_runs;
@@ -158,6 +164,10 @@ void testKMV(int k)
 
 int main(int argc, char const *argv[])
 {
+
+  testKMV<uint32_t>(32);
+  testKMV<uint32_t>(32, 10, true);
+  exit(0);
 
   std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality|size-estim|exact-sizes] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)

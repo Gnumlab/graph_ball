@@ -14,10 +14,13 @@ private:
     T *values;
     TabulationHash<T> *h;
     uint16_t k;
+    uint16_t max_index;
 
 public:
     KMVCounter(uint16_t, TabulationHash<T> *);
     ~KMVCounter();
+    void add_old(uint32_t);
+    uint32_t size_old();
     void add(uint32_t);
     uint32_t size();
     void merge(KMVCounter *);
