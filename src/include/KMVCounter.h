@@ -24,6 +24,7 @@ public:
     void add(uint32_t);
     uint32_t size();
     void merge(KMVCounter *);
+    void merge_old(KMVCounter *);
     void flush();
 };
 

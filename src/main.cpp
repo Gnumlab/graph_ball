@@ -165,10 +165,6 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 int main(int argc, char const *argv[])
 {
 
-  testKMV<uint32_t>(32);
-  testKMV<uint32_t>(32, 10, true);
-  exit(0);
-
   std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality|size-estim|exact-sizes] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
