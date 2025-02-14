@@ -2,7 +2,6 @@
 #include <cstring>
 #include <iostream>
 #include "experiments/experiments.cpp"
-#include "include/HLLCounter.h"
 #include "Hash.cpp"
 #include "include/KMVCounter.h"
 #include <typeinfo>
@@ -27,21 +26,17 @@ void computeMinHashSignatures()
   return;
 }
 
-void computeExactBalls()
+void computeExactBalls(std::string fname, bool isDirected)
 {
   std::vector<float> densities = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-  std::vector<std::pair<std::string, bool>> dataset = {
-      {"comm-linux-kernel-reply", true},
-      {"fb-wosn-friends", false},
-      {"ia-enron-email-all", true},
-      {"soc-youtube-growth", true},
-      {"soc-flickr-growth", true},
-  };
+  cerr<< fname<<endl;
+  writeExactBalls(fname, isDirected, 5000, densities);
+}
+void computeExactSizes(std::string fname, bool isDirected)
+{
 
-  for (auto d : dataset)
-    writeExactBalls(d.first, d.second, 5000, densities);
-
-  return;
+  cerr<< fname<<endl;
+  printSortedBallSizes(fname, isDirected);
 }
 
 void preprocessPairs(int b, int r, float J)
@@ -109,8 +104,8 @@ void kmvCounterTimeExperiment(std::string fname, bool isDirected, uint16_t count
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
 
   printf("n,m,k,phi,counter_size,time\n");
-  updatesTimeKMVBall(fname, isDirected, ks, phis, counter_size, 1);
-  updatesTimeKMVBall(fname, isDirected, {0}, {0.0}, counter_size, n_run);
+  updatesTimeKMVBall(fname, isDirected, ks, phis, counter_size, 10);
+  updatesTimeKMVBall(fname, isDirected, {0}, {0.0}, counter_size, 1);
 }
 
 void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint16_t counter_size = 32, int n_run = 10)
@@ -118,22 +113,21 @@ void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint1
   std::vector<int> ks = {0, 2, 4, 8};
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
   std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9};
-
-  printf("density,k,phi,u,ball_apx,ball_exact\n");
+  printf("alpha,k,phi,u,ball_size,effective_size\n");
   sizeEstimationExperiment(datasetName, isDirected, ks, phis, timeStamps, counter_size, n_run);
 }
 
 template <typename T>
-void testKMV(int k)
+void testKMV(int k, int runs = 10, bool use_old = 0)
 {
   srand(time(NULL));
   uint32_t N = 1 << 24;
 
-  int n_runs = 100;
+  int n_runs = runs;
   float size_esitmation = 0.0;
   float error = 0.0;
 
-  printf("KMVCounter<%s>\n", typeid(T).name() == typeid(uint32_t).name() ? "uint32_t" : "uint64_t");
+  printf("KMVCounter<%s>_%d\n", typeid(T).name() == typeid(uint32_t).name() ? "uint32_t" : "uint64_t", use_old);
   printf("\truns: %d\n\tk: %d\n", n_runs, k);
 
   for (int j = 0; j < n_runs; j++)
@@ -143,11 +137,17 @@ void testKMV(int k)
     KMVCounter<T> *kmv = new KMVCounter<T>(k, h);
 
     for (uint32_t i = 0; i < N; i++)
-      kmv->add(i);
+    {
+       if (use_old)kmv->add_old(i);
+       else kmv->add(i);
+    }
 
-    uint32_t size = kmv->size();
+    uint32_t size;
+    if(use_old) size = kmv->size_old();
+    else size = kmv->size();
+    
     size_esitmation += size;
-    error += abs((float)size - (float)N) / (float)N;
+    error += abs((float)size - (float)N) / (float)(N);
   }
 
   float avg_size = (float)size_esitmation / (float)n_runs;
@@ -169,7 +169,11 @@ int main(int argc, char const *argv[])
   // testKMV<uint32_t>(32);
   // exit(0);
 
-  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality] <dataset> <isDirected> <n_hashes|counter_size>";
+  testKMV<uint32_t>(32);
+  testKMV<uint32_t>(32, 10, true);
+  exit(0);
+
+  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality|size-estim|exact-sizes] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
     cout << usage << endl;
@@ -198,12 +202,18 @@ int main(int argc, char const *argv[])
     uint16_t counter_size = atoi(argv[4]);
     kmvCounterTimeExperiment(filename, isDirected, counter_size);
   }
-  else if (experimentType == "counter-quality")
+  else if (experimentType == "size-estim")
   {
     std::string filename = argv[2];
     bool isDirected = (bool)atoi(argv[3]);
     uint16_t counter_size = atoi(argv[4]);
     kmvCounterQualityExperiment(filename, isDirected, counter_size);
+  }
+  else if (experimentType == "exact-sizes")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    computeExactSizes(filename, isDirected);
   }
   else
   {

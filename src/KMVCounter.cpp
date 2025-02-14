@@ -54,6 +54,38 @@ void KMVCounter<T>::add(uint32_t x)
     }
 }
 
+
+
+template <typename T>
+void KMVCounter<T>::add_old(uint32_t x)
+{
+    T hash_value = (*this->h)(x);
+
+    if (hash_value < this->values[this->max_index])
+    {
+        this->values[this->max_index] = hash_value;
+
+        this->max_index = 0;
+        for (uint16_t i = 1; i < this->k; i++)
+        {
+            if (this->values[i] > this->values[this->max_index])
+            {
+                this->max_index = i;
+            }
+        }
+    }
+    
+
+}
+
+
+template <typename T>
+uint32_t KMVCounter<T>::size_old()
+{
+    return static_cast<uint32_t>(this->k * (double)std::numeric_limits<T>::max() / (double)this->values[this->max_index]);
+}
+
+
 template <typename T>
 uint32_t KMVCounter<T>::size()
 {

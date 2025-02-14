@@ -22,7 +22,7 @@ void printSortedBallSizes(std::string filename, bool isDirected)
     std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
               { return a.second > b.second; });
 
-    cout << G->getN() << endl;
+    //cout << G->getN() << endl;
     for (uint32_t i = 0; i < G->getN(); i++)
         cout << nodes[i].first << " " << nodes[i].second << endl;
 
@@ -183,7 +183,7 @@ void writeExactBalls(std::string datasetName, bool isDirected, uint32_t topK = 1
         {
             if (static_cast<uint64_t>(m * 2 * alpha) - 2 <= i && i < static_cast<uint64_t>(m * 2 * alpha))
             {
-                std::string outFileName = "./dataset/data/balls/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.balls";
+                std::string outFileName = "./dataset/data/balls/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + ".balls";
                 std::ofstream file(outFileName);
 
                 cerr << "Writing balls for " << alpha << " density" << endl;

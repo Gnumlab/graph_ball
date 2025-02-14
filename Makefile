@@ -26,7 +26,7 @@ build:
 	@mkdir -p $(APP_DIR)
 	@mkdir -p $(OBJ_DIR)
 
-debug: CFLAGS += -DDEBUG -g
+debug: CFLAGS += -DDEBUG -g -O0
 debug: all
 
 release: CFLAGS += -O2
