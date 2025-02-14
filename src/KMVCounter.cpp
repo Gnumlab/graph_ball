@@ -42,7 +42,7 @@ void KMVCounter<T>::add(uint32_t x)
         while (this->values[i] < hash_value)
             i++;
 
-        if (this->values[i] == hash_value) break;  // skip duplicate
+        if (this->values[i] == hash_value) return;  // skip duplicate
         T current = hash_value;
         T temp;
 
