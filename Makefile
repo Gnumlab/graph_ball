@@ -8,35 +8,35 @@ TARGET   := run
 INCLUDE  := -Iinclude/
 SRC      := $(wildcard src/*.cpp)
 
-OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)
+OBJECTS := $(SRC:src/%.cpp=$(OBJ_DIR)/%.o)
 
 all: build $(APP_DIR)/$(TARGET)
 
-$(OBJ_DIR)/%.o: %.c
+# Rule to create .o files in the build/objects directory
+$(OBJ_DIR)/%.o: src/%.cpp
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $< 
 
+# Rule to create the executable in the build/apps directory
 $(APP_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) $(INCLUDE) -o $(APP_DIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ $(OBJECTS) $(LDFLAGS)
 
 .PHONY: all build clean debug release
 
+# Rule to build the necessary directories
 build:
 	@mkdir -p $(APP_DIR)
 	@mkdir -p $(OBJ_DIR)
 
-debug: CFLAGS += -DDEBUG -g -O0
+# Debug and release targets
+debug: CFLAGS += -DDEBUG -O0
 debug: all
 
 release: CFLAGS += -O2
 release: all
 
+# Clean target to remove generated files
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
 	-@rm -rvf $(APP_DIR)/*
-	
-	
-#$(eval N_CPU=$(shell grep -c ^processor /proc/cpuinfo)
-
-#$(shell echo #define N_CPU = N_CPU >> system.h) 
