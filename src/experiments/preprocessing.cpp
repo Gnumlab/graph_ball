@@ -8,7 +8,7 @@
  * This funcion wirte to file the size of the balls of radius 2 for each vertex in the graph, sorted by size in non-increasing order.
  * The output file is named as `dataset/data/ball-sizes/{datasetName}.balls`
  * The format of the output file is `vertex_id ball_size`.
- * 
+ *
  * @param datasetName: name of the dataset.
  * @param isDirected: boolean indicating whether the graph is directed or not.
  * @return: void
@@ -32,7 +32,9 @@ void writeSortedBallSizes(std::string datasetName, bool isDirected)
 
     for (uint32_t i = 0; i < G->getN(); i++)
         file << nodes[i].first << " " << nodes[i].second << std::endl;
-        // cout << nodes[i].first << " " << nodes[i].second << endl;
+    // cout << nodes[i].first << " " << nodes[i].second << endl;
+
+    cerr << "File " << outputFileName << " created" << endl;
 
     delete G;
     file.close();
@@ -68,7 +70,7 @@ std::vector<uint32_t> *topKBall2(Graph_csr<T> *G, uint32_t k)
 
 /**
  * TODO: No needed anymore: remove this function
- * 
+ *
  * This function computes the minhash signatures for all the vertices with the top k largest balls of radius 2.
  * More preciselly, the function computes `n_hashes` minhash signatures for the top `topK` vertices with the largest balls of radius 2,
  * considering a snapshot of the graph at different densities specified by the `density` vector.
@@ -192,7 +194,7 @@ void writeExactBalls(std::string datasetName, bool isDirected, uint32_t topK = 1
         {
             if (static_cast<uint64_t>(m * 2 * alpha) - 2 <= i && i < static_cast<uint64_t>(m * 2 * alpha))
             {
-                std::string outFileName = "./dataset/data/balls/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + ".balls";
+                std::string outFileName = "./dataset/data/balls/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.balls";
                 std::ofstream file(outFileName);
 
                 cerr << "Writing balls for " << alpha << " density" << endl;
@@ -318,13 +320,13 @@ void computePairs(std::string datasetName, int sig_size, int b, int r, float J)
  * This function samples pairs of vertices with Jaccard similarity greater than or equal to a given threshold.
  * The vertices are the top k vertices with the largest balls of radius 2.
  * Each pair is sampled with probability p.
- * 
+ *
  * The pairs are written to a file with the following format:
  * vertex_id_1 vertex_id_2 Jaccard_similarity
- * 
+ *
  * The output file is named as follows:
  * dataset/data/pairs/{datasetName}.pairs
- * 
+ *
  * @param datasetName: name of the dataset.
  * @param threshold: Jaccard similarity threshold.
  * @param p: probability of sampling a pair.
@@ -353,10 +355,10 @@ void computePairs2(std::string datasetName, float threshold = 0.2, float p = 0.0
     {
         for (auto itr2 = itr; itr2 != balls.end(); itr2++)
         {
-            if ((rand() % 100) < static_cast<int>(p * 100.0))
+            if ((float)(rand() % 100) < (p * 100.0))
             {
                 if (i++ % 10000 == 0)
-                    clog << "\r" << i << flush;
+                    cerr << "\r" << i << flush;
 
                 if (itr != itr2)
                 {

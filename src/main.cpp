@@ -43,8 +43,9 @@ void computeExactBalls(std::string fname, bool isDirected, int topK = 5000, vect
  */
 void computeExactSizes(std::string fname, bool isDirected)
 {
-  cerr << fname << endl;
+  cerr << "Computing exact ball sizes for " << fname << " ..." << endl;
   writeSortedBallSizes(fname, isDirected);
+  cerr << "Done" << endl;
 }
 
 /**
