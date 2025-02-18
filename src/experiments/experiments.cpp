@@ -250,7 +250,7 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
 
     std::cerr<<G->balls[1].size()<<std::endl;
     uint64_t i = 0;
-    for (int j = 0; j < timeStamps.size(); j++)
+    for (size_t j = 0; j < timeStamps.size(); j++)
     {
         float alpha = timeStamps[j];
 
@@ -292,7 +292,7 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
                 G->flush_graph();
 
                 i = 0;
-                for (int j = 0; j < timeStamps.size(); j++)
+                for (size_t j = 0; j < timeStamps.size(); j++)
                 {
                     float alpha = timeStamps[j];
 

@@ -51,14 +51,14 @@ void computeExactSizes(std::string fname, bool isDirected)
  * This function computes the pairs of vertices with Jaccard similarity greater than or equal to a given threshold.
  * The vertices are the top k vertices with the largest balls of radius 2.
  * Each pair is sampled with probability p.
- * 
+ *
  * The pairs are written to a file with the following format:
  * vertex_id_1 vertex_id_2 Jaccard_similarity
- * 
+ *
  * The output file is named as follows:
  * dataset/data/pairs/{datasetName}_{alpha*100}%.pairs
  * where `alpha` is the density of the graph in the range [0.5, 0.75, 1.0]
- * 
+ *
  * @param datasetName: name of the dataset.
  * @param threshold: Jaccard similarity threshold.
  * @param p: probability of sampling a pair.
@@ -104,7 +104,7 @@ void kmvCounterTimeExperiment(std::string fname, bool isDirected, uint16_t count
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
 
   printf("n,m,k,phi,counter_size,time\n");
-  updatesTimeKMVBall(fname, isDirected, ks, phis, counter_size, 10);
+  updatesTimeKMVBall(fname, isDirected, ks, phis, counter_size, n_run);
   updatesTimeKMVBall(fname, isDirected, {0}, {0.0}, counter_size, 1);
 }
 
@@ -138,17 +138,11 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 
     for (uint32_t i = 0; i < N; i++)
     {
-      if (use_old)
-        kmv->add_old(i);
-      else
-        kmv->add(i);
+      kmv->add(i);
     }
 
     uint32_t size;
-    if (use_old)
-      size = kmv->size_old();
-    else
-      size = kmv->size();
+    size = kmv->size();
 
     size_esitmation += size;
     error += abs((float)size - (float)N) / (float)(N);

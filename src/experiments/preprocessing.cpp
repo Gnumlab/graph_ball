@@ -5,13 +5,19 @@
 #include "LSH.cpp"
 
 /**
- * Print the size of the balls of radius 2 for each vertex in the graph, sorted by size in non-increasing order.
- * @param filename: name of the file containing the graph.
+ * This funcion wirte to file the size of the balls of radius 2 for each vertex in the graph, sorted by size in non-increasing order.
+ * The output file is named as `dataset/data/ball-sizes/{datasetName}.balls`
+ * The format of the output file is `vertex_id ball_size`.
+ * 
+ * @param datasetName: name of the dataset.
  * @param isDirected: boolean indicating whether the graph is directed or not.
  * @return: void
  */
-void printSortedBallSizes(std::string filename, bool isDirected)
+void writeSortedBallSizes(std::string datasetName, bool isDirected)
 {
+    std::string filename = "./dataset/data/" + datasetName + ".edges";
+    std::string outputFileName = "./dataset/data/ball-sizes/" + datasetName + ".balls";
+
     Graph_csr<LazyBall> *G = Graph_csr<LazyBall>::from_file(filename, isDirected, 0, 0.0);
     G->fill_graph();
 
@@ -22,11 +28,14 @@ void printSortedBallSizes(std::string filename, bool isDirected)
     std::sort(nodes.begin(), nodes.end(), [](auto &a, auto &b)
               { return a.second > b.second; });
 
-    //cout << G->getN() << endl;
+    std::ofstream file(outputFileName);
+
     for (uint32_t i = 0; i < G->getN(); i++)
-        cout << nodes[i].first << " " << nodes[i].second << endl;
+        file << nodes[i].first << " " << nodes[i].second << std::endl;
+        // cout << nodes[i].first << " " << nodes[i].second << endl;
 
     delete G;
+    file.close();
     return;
 }
 
