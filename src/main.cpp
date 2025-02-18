@@ -8,70 +8,70 @@
 
 using namespace std;
 
-void computeMinHashSignatures()
+/**
+ * This function computes the exact balls for the top K vertices in the graph,
+ * and writes the results to a file.
+ *
+ * The output file is named as `dataset/data/balls/{datasetName}_{alpha*100}%.balls`
+ * where `alpha` is the density of the graph in the range [0.5, 0.75, 1.0]
+ *
+ * The balls are written in the format `vertex_id ball_size vertex_1 vertex_2 ... vertex_{ball_size}`
+ *
+ * @param fname: the name of the dataset
+ * @param isDirected: whether the graph is directed or not
+ * @param topK: the number of top vertices to consider
+ */
+void computeExactBalls(std::string fname, bool isDirected, int topK = 5000, vector<float> densities = {0.5, 0.75, 1.0})
 {
-  std::vector<float> densities = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-  std::vector<std::pair<std::string, bool>> dataset = {
-      {"comm-linux-kernel-reply", true},
-      {"fb-wosn-friends", false},
-      {"ia-enron-email-all", true},
-      {"soc-youtube-growth", true},
-      {"soc-flickr-growth", true},
-  };
-  int n_hash = 2000;
-
-  for (auto d : dataset)
-    writeMinHashSignatures(d.first, d.second, n_hash, 5000, densities);
-
-  return;
+  cerr << fname << endl
+       << flush;
+  writeExactBalls(fname, isDirected, topK, densities);
 }
 
-void computeExactBalls(std::string fname, bool isDirected)
-{
-  std::vector<float> densities = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
-  cerr<< fname<<endl;
-  writeExactBalls(fname, isDirected, 5000, densities);
-}
+/**
+ * This function computes the exact sizes of the balls of radius 2 for each vertex in the graph,
+ * and writes the results to a file in non-decreasing order.
+ *
+ * The output file is named as `dataset/data/ball-sizes/{datasetName}.balls`
+ * where `datasetName` is the name of the dataset.
+ *
+ * The balls are written in the format `vertex_id ball_size`
+ *
+ * @param fname: the name of the dataset
+ * @param isDirected: whether the graph is directed or not
+ * @return: void
+ */
 void computeExactSizes(std::string fname, bool isDirected)
 {
-
-  cerr<< fname<<endl;
-  printSortedBallSizes(fname, isDirected);
+  cerr << fname << endl;
+  writeSortedBallSizes(fname, isDirected);
 }
 
-void preprocessPairs(int b, int r, float J)
+/**
+ * This function computes the pairs of vertices with Jaccard similarity greater than or equal to a given threshold.
+ * The vertices are the top k vertices with the largest balls of radius 2.
+ * Each pair is sampled with probability p.
+ * 
+ * The pairs are written to a file with the following format:
+ * vertex_id_1 vertex_id_2 Jaccard_similarity
+ * 
+ * The output file is named as follows:
+ * dataset/data/pairs/{datasetName}_{alpha*100}%.pairs
+ * where `alpha` is the density of the graph in the range [0.5, 0.75, 1.0]
+ * 
+ * @param datasetName: name of the dataset.
+ * @param threshold: Jaccard similarity threshold.
+ * @param p: probability of sampling a pair.
+ * @param densities: vector of densities to consider.
+ * @return: void
+ */
+void preprocessPairs(string datasetName, float threshold = 0.2, float p = 0.01, vector<float> densities = {0.5, 0.75, 1.0})
 {
-  std::vector<std::pair<std::string, bool>> dataset = {
-      {"comm-linux-kernel-reply", true},
-      {"fb-wosn-friends", false},
-      {"ia-enron-email-all", true},
-      {"soc-youtube-growth", true},
-      {"soc-flickr-growth", true},
-  };
-
-  for (auto d : dataset)
-    computePairs(d.first + "_100\%", 2000, b, r, J);
-
-  return;
-}
-
-void preprocessPairs2(float threshold = 0.2, float p = 0.01)
-{
-  std::vector<std::pair<std::string, bool>> dataset = {
-      {"comm-linux-kernel-reply", true},
-      {"fb-wosn-friends", false},
-      {"ia-enron-email-all", true},
-      {"soc-youtube-growth", true},
-      {"soc-flickr-growth", true},
-  };
-
-  for (auto d : dataset)
+  for (float d : densities)
   {
-    for (auto density : {"_50\%", "_60\%", "_70\%", "_80\%", "_90\%", "_100\%"})
-      computePairs2(d.first + density, threshold, p);
+    string density = "_" + to_string(static_cast<int>(d * 100)) + "\%";
+    computePairs2(datasetName + density, threshold, p);
   }
-
-  return;
 }
 
 void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 10)
@@ -138,14 +138,18 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 
     for (uint32_t i = 0; i < N; i++)
     {
-       if (use_old)kmv->add_old(i);
-       else kmv->add(i);
+      if (use_old)
+        kmv->add_old(i);
+      else
+        kmv->add(i);
     }
 
     uint32_t size;
-    if(use_old) size = kmv->size_old();
-    else size = kmv->size();
-    
+    if (use_old)
+      size = kmv->size_old();
+    else
+      size = kmv->size();
+
     size_esitmation += size;
     error += abs((float)size - (float)N) / (float)(N);
   }
@@ -164,12 +168,7 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 
 int main(int argc, char const *argv[])
 {
-  // testKMV<uint32_t>(8);
-  // testKMV<uint32_t>(16);
-  // testKMV<uint32_t>(32);
-  // exit(0);
-
-  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|counter-quality|size-estim|exact-sizes] <dataset> <isDirected> <n_hashes|counter_size>";
+  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|size-estim|compute-exact-sizes|compute-pairs] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
     cout << usage << endl;
@@ -205,11 +204,19 @@ int main(int argc, char const *argv[])
     uint16_t counter_size = atoi(argv[4]);
     kmvCounterQualityExperiment(filename, isDirected, counter_size);
   }
-  else if (experimentType == "exact-sizes")
+  else if (experimentType == "compute-exact-sizes")
   {
     std::string filename = argv[2];
     bool isDirected = (bool)atoi(argv[3]);
     computeExactSizes(filename, isDirected);
+  }
+  else if (experimentType == "compute-pairs")
+  {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+
+    computeExactBalls(filename, isDirected);
+    preprocessPairs(filename);
   }
   else
   {
