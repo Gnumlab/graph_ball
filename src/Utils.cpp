@@ -6,6 +6,7 @@
 #include <random>
 #include <fstream>
 #include <unordered_map>
+#include <algorithm>
 #include "include/Utils.h"
 
 /**
@@ -133,6 +134,30 @@ std::unordered_map<uint32_t, std::unordered_set<uint32_t>> read_balls(std::strin
     file.clear();
     file.close();
     return balls;
+}
+
+std::vector<std::pair<std::pair<uint32_t, uint32_t>, float>> readPairs(std::string filename)
+{
+    std::ifstream file(filename);
+
+    std::vector<std::pair<std::pair<uint32_t, uint32_t>, float>> pairs;
+
+    uint32_t u, v;
+    float sim;
+
+    while (file >> u)
+    {
+        file >> v;
+        file >> sim;
+        pairs.push_back({{u, v}, sim});
+    }
+
+    file.clear();
+    file.close();
+
+    std::random_shuffle(pairs.begin(), pairs.end());
+
+    return pairs;
 }
 
 /* premute the edge set edges. The edge (u, v) in edges is stored as two consecutive integers

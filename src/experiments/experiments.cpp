@@ -248,7 +248,7 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
     TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
     Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_file(fileName, isDirected, 0, 0.0, counter_size, hash);
 
-    std::cerr<<G->balls[1].size()<<std::endl;
+    std::cerr << G->balls[1].size() << std::endl;
     uint64_t i = 0;
     for (size_t j = 0; j < timeStamps.size(); j++)
     {
@@ -319,6 +319,86 @@ void sizeEstimationExperiment(string datasetName, bool isDirected, vector<int> k
     }
 
     delete hash;
+    delete[] edges;
+    delete G;
+}
+
+void similarityEstimationExperiment(string datasetName, bool isDirected, vector<int> ks, vector<float> phis, vector<float> timeStamps, int n_hashes = 100, int n_runs = 10, int max_sample_size = 1000)
+{
+    string fileName = "dataset/data/" + datasetName + ".edges";
+
+    uint32_t n;
+    uint64_t m;
+
+    uint32_t *edges = read_edges(fileName, &n, &m);
+
+    TabulationHash<uint32_t> **hashes = new TabulationHash<uint32_t> *[n_hashes];
+    for (int i = 0; i < n_hashes; i++)
+        hashes[i] = new TabulationHash<uint32_t>();
+
+    Graph_csr<MinHashBall> *G = Graph_csr<MinHashBall>::from_file(fileName, isDirected, 0, 0.0, n_hashes, (Hash<uint32_t> **)hashes);
+
+    uint64_t i = 0;
+    /* RUN EXPERIMENTS */
+    for (int t = 0; t < n_runs; t++)
+    {
+        for (float phi : phis)
+        {
+            cerr << "phi: " << phi << endl;
+            G->setThreshold(phi);
+            for (int k : ks)
+            {
+                std::cerr << "\tk: " << k << std::endl
+                          << std::flush;
+
+                G->setK(k);
+
+                for (int l = 0; l < n_hashes; l++)
+                {
+                    hashes[l]->reset();
+                }
+
+                G->flush_graph();
+
+                i = 0;
+                for (size_t j = 0; j < timeStamps.size(); j++)
+                {
+
+                    float alpha = timeStamps[j];
+
+                    for (; i < 2 * m * alpha; i += 2)
+                    {
+                        G->update(edges[i], edges[i + 1]);
+                    }
+
+                    auto pairs = readPairs("dataset/data/pairs/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.pairs");
+
+                    for (int l = 0; l < min((size_t)max_sample_size, pairs.size()); l++)
+                    {
+                        uint32_t u = pairs[l].first.first;
+                        uint32_t v = pairs[l].first.second;
+                        float true_similarity = pairs[l].second;
+
+                        float estimated_similarity = MinHashBall::similarity(&(G->balls[u]), &(G->balls[v]));
+
+                        printf("%.2f,%d,%.2f,%u,%u,%f,%f\n", alpha, k, phi, u, v, true_similarity, estimated_similarity);
+                        std::cout << std::flush;
+                    }
+                }
+
+                if (phi == 0.0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < n_hashes; i++)
+    {
+        delete hashes[i];
+    }
+    delete[] hashes;
     delete[] edges;
     delete G;
 }

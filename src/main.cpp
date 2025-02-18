@@ -99,6 +99,16 @@ void minhashTimeExperiment(std::string fname, bool isDirected, int n_hashes = 10
   updatesTimeMinHashBall(fname, isDirected, {0}, {0.0}, n_hashes, n_runs);
 }
 
+void minhashQualityExperiment(std::string fname, bool isDirected, int n_hashes = 100, int n_runs = 10)
+{
+  std::vector<int> ks = {0, 2, 4, 8};
+  std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
+  std::vector<float> timeStamps = {0.5, 0.75, 1.0};
+
+  printf("alpha,k,phi,u,v,true_similarity,estimated_similarity\n");
+  similarityEstimationExperiment(fname, isDirected, ks, phis, timeStamps, n_hashes, n_runs, 1000);
+}
+
 void kmvCounterTimeExperiment(std::string fname, bool isDirected, uint16_t counter_size = 32, int n_run = 10)
 {
   std::vector<int> ks = {0, 2, 4, 8};
@@ -163,7 +173,7 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 
 int main(int argc, char const *argv[])
 {
-  std::string usage = "./build/apps/run [explicit|minhash-time|minhash-quality|counter-time|size-estim|compute-exact-sizes|compute-pairs] <dataset> <isDirected> <n_hashes|counter_size>";
+  std::string usage = "./build/apps/run [explicit|minhash-time|similarity-estim|counter-time|size-estim|compute-exact-sizes|compute-pairs] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
     cout << usage << endl;
@@ -184,6 +194,12 @@ int main(int argc, char const *argv[])
     bool isDirected = (bool)atoi(argv[3]);
     int n_hashes = atoi(argv[4]);
     minhashTimeExperiment(filename, isDirected, n_hashes);
+  }
+  else if (experimentType == "similarity-estim") {
+    std::string filename = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    int n_hashes = atoi(argv[4]);
+    minhashQualityExperiment(filename, isDirected, n_hashes);
   }
   else if (experimentType == "counter-time")
   {
