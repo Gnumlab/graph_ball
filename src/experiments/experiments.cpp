@@ -133,6 +133,8 @@ void updatesTimeMinHashBall(std::string filename, bool isDirected, std::vector<i
 
     for (int i = 0; i < n_runs; i++)
     {
+        std::cerr << "Run: " << i << std::endl
+                  << std::flush;
         for (float phi : phis)
         {
             std::cerr << "phi: " << phi << std::endl
@@ -373,7 +375,7 @@ void similarityEstimationExperiment(string datasetName, bool isDirected, vector<
 
                     auto pairs = readPairs("dataset/data/pairs/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.pairs");
 
-                    for (int l = 0; l < min((size_t)max_sample_size, pairs.size()); l++)
+                    for (size_t l = 0; l < min((size_t)max_sample_size, pairs.size()); l++)
                     {
                         uint32_t u = pairs[l].first.first;
                         uint32_t v = pairs[l].first.second;

@@ -1,4 +1,3 @@
-// #include "Graph_csr.cpp"
 #include <cstring>
 #include <iostream>
 #include "experiments/experiments.cpp"
@@ -78,10 +77,10 @@ void preprocessPairs(string datasetName, float threshold = 0.2, float p = 0.01, 
 void explicitBallSizeExperiment(std::string fname, bool isDirected, int n_run = 10)
 {
   srand(time(NULL));
-  std::vector<int> ks = {0, 1, 2, 4, 8, 16};
-  std::vector<float> phis = {0.1, 0.2, 0.4, 0.6, 0.8, 1.0};
+  std::vector<int> ks = {0, 2, 4, 8};
+  std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0};
   int sample_size = 5000;
-  int n_queries = 1000;
+  int n_queries = 100;
   float initial_density = 0.2;
 
   printf("k,phi,timestamp,vertex,ball_size,cumulative_merges\n");
@@ -123,7 +122,7 @@ void kmvCounterQualityExperiment(std::string datasetName, bool isDirected, uint1
 {
   std::vector<int> ks = {0, 2, 4, 8};
   std::vector<float> phis = {0.1, 0.25, 0.5, 0.75, 1.0, 0.0};
-  std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9};
+  std::vector<float> timeStamps = {0.5, 0.75, 1.0};
   printf("alpha,k,phi,u,ball_size,effective_size\n");
   sizeEstimationExperiment(datasetName, isDirected, ks, phis, timeStamps, counter_size, n_run);
 }
@@ -195,7 +194,8 @@ int main(int argc, char const *argv[])
     int n_hashes = atoi(argv[4]);
     minhashTimeExperiment(filename, isDirected, n_hashes);
   }
-  else if (experimentType == "similarity-estim") {
+  else if (experimentType == "similarity-estim")
+  {
     std::string filename = argv[2];
     bool isDirected = (bool)atoi(argv[3]);
     int n_hashes = atoi(argv[4]);
