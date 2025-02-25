@@ -1,3 +1,8 @@
+The following project is part of PAPER NAME by AUTHORS NAME.
+
+Cite us through
+  Make Arxiv bib citation
+
 Compile using make
 The executable is generated in the folder build/apps
 The program needs a file name for the input graph and an integer (0/1) to indicate if the input graph is to be considered undirected (0) or directed (1).
