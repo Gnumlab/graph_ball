@@ -1,6 +1,6 @@
 CC       := g++
 CFLAGS   := -DARCH_X86_64 -Wall -Wextra -g -pg -O2
-LDFLAGS  := -L/usr/lib -fopenmp -lm
+LDFLAGS  := -L/usr/lib -lm
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
