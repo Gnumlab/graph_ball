@@ -229,6 +229,13 @@ int main(int argc, char const *argv[])
     computeExactBalls(filename, isDirected);
     preprocessPairs(filename);
   }
+  else if (experimentType == "distances")
+  {
+    std::string datasetName = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
+    uint16_t counter_size = atoi(argv[4]);
+    computeDistances(datasetName, isDirected, counter_size);
+  }
   else
   {
     cout << usage << endl;

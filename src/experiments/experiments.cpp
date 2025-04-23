@@ -404,3 +404,56 @@ void similarityEstimationExperiment(string datasetName, bool isDirected, vector<
     delete[] edges;
     delete G;
 }
+
+void computeDistances(std::string datasetName, bool isDirected, uint16_t counter_size, float phi = 0.25, int k = 2)
+{
+    std::vector<float> timeStamps = {0.5, 0.75, 1.0};
+
+    string fileName = "dataset/data/" + datasetName + ".edges";
+
+    uint32_t n;
+    uint64_t m;
+
+    uint32_t *edges = read_edges(fileName, &n, &m);
+
+    TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
+    Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_file(fileName, isDirected, k, phi, counter_size, hash);
+
+    uint64_t i = 0;
+    for (float alpha : timeStamps)
+    {
+        for (; i < 2 * m * alpha; i += 2)
+            G->update(edges[i], edges[i + 1]);
+
+        std::string outputFileName = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.dist";
+        // std::string apx_layers = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%_apx.dist";
+        std::ofstream file(outputFileName, ios::out);
+
+        for (uint32_t u = 0; u < n; u++)
+        {
+            cerr << "\r" << alpha * 100 << "%\t" << 100 * u / n << "%";
+            uint32_t h1size = G->balls[u].ball1->size();
+            uint32_t h2size = G->balls[u].ball2->size();
+            // printf("%u %u %u", u, h1size, h2size);
+            file << u << " " << h1size << " " << h2size;
+
+            uint32_t *layers = G->bfs_layers(u);
+            uint32_t h = 1;
+            while (layers[h] != 0)
+            {
+                // printf(" %u", layers[h++]);
+                file << " " << layers[h++];
+            }
+            // printf("\n");
+            file << endl;
+        }
+
+        file.close();
+    }
+
+    cerr << endl;
+
+    delete hash;
+    delete[] edges;
+    delete G;
+}
