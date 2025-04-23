@@ -27,6 +27,7 @@ Graph_csr<T>::~Graph_csr()
     delete[] this->queue;
     delete[] this->visited;
     delete[] this->balls;
+    delete[] this->layers;
 }
 
 // constructor
@@ -53,9 +54,12 @@ Graph_csr<T>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float ph
     }
 
     this->balls = new T[this->n];
+    this->layers = new uint32_t[this->n];
 
     for (uint32_t i = 0; i < this->n; i++)
     {
+        this->layers[i] = 0;
+
         this->balls[i].insert(i);
         this->o_First[i] = 0;
         this->o_degree[i] = 0;
@@ -69,7 +73,8 @@ Graph_csr<T>::Graph_csr(uint32_t N, uint64_t M, bool isDirected, int k, float ph
         }
     }
 
-    this->queue = new uint32_t[this->n];
+    // this->queue = new uint32_t[this->n];
+    this->queue = new pair<uint32_t, uint32_t>[this->n];
     this->visited = new uint32_t[this->n];
 
     this->bfs_timestamp = 0;
@@ -325,6 +330,42 @@ uint32_t Graph_csr<T>::bfs_2(uint32_t u)
     // }
 
     // return size;
+}
+
+template <class T>
+uint32_t* Graph_csr<T>::bfs_layers(uint32_t u)
+{
+    for (uint32_t i = 0; (i < this->n) && (this->layers[i] != 0); i++)
+        this->layers[i] = 0;
+
+    uint32_t size = o_degree[u] + 1;
+    uint32_t v, w, d;
+    uint32_t head = 0, tail = 0;
+    bfs_timestamp++;
+
+    visited[u] = bfs_timestamp;
+    queue[tail++] = {u, 0};
+
+    while (tail > head)
+    {
+        auto p = queue[head++];
+        v = p.first;
+        d = p.second;
+        this->layers[d]++;
+
+        for (uint64_t i = o_First[v]; i < o_First[v] + o_degree[v]; i++)
+        {
+            w = o_Target[i];
+            if (visited[w] != bfs_timestamp)
+            {
+                visited[w] = bfs_timestamp;
+                queue[tail++] = {w, d + 1};
+                size++;
+            }
+        }
+    }
+
+    return this->layers;
 }
 
 template <class T>

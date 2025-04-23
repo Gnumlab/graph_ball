@@ -33,8 +33,9 @@ private:
 
     int k;
     float phi;
+    uint32_t *layers;
+    pair<uint32_t, uint32_t> *queue;
 
-    uint32_t *queue;
     uint32_t *visited;
     uint32_t bfs_timestamp;
 
@@ -83,6 +84,8 @@ public:
      * @return: size of the subgraph reachable from vertex u within distance 2.
      */
     uint32_t bfs_2(uint32_t u);
+
+    uint32_t *bfs_layers(uint32_t u);
 
     /**
      * This method returns the ball of radius 2 of the given vertex u.
