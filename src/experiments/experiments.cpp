@@ -407,7 +407,7 @@ void similarityEstimationExperiment(string datasetName, bool isDirected, vector<
 
 void computeDistances(std::string datasetName, bool isDirected, uint16_t counter_size, float phi = 0.25, int k = 2)
 {
-    std::vector<float> timeStamps = {0.5, 0.75, 1.0};
+    std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 
     string fileName = "dataset/data/" + datasetName + ".edges";
 
@@ -415,6 +415,7 @@ void computeDistances(std::string datasetName, bool isDirected, uint16_t counter
     uint64_t m;
 
     uint32_t *edges = read_edges(fileName, &n, &m);
+    permute_edges(edges, 2 * m);
 
     TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
     Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_file(fileName, isDirected, k, phi, counter_size, hash);

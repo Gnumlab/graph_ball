@@ -164,7 +164,7 @@ std::vector<std::pair<std::pair<uint32_t, uint32_t>, float>> readPairs(std::stri
  * The permutation is executed in a selection sort manner: suppose the first i position permuted, select at random the next edges to put in position i+1.
  * The edge is taken in the unpermuted part of the array (last size - i elements)
  */
-void permute_edges(int *edges, int size)
+void permute_edges(uint32_t *edges, int size)
 {
     // Seed the random number generator
     srand(time(NULL));
