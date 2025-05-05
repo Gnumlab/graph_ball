@@ -175,6 +175,18 @@ void Graph_csr<T>::setM(uint64_t m)
 }
 
 template <class T>
+uint32_t Graph_csr<T>::get_out_degree(uint32_t const u) const
+{
+    return this->o_degree[u];
+}
+
+template <class T>
+uint32_t Graph_csr<T>::get_in_degree(uint32_t const u) const
+{
+    return this->i_degree[u];
+}
+
+template <class T>
 void Graph_csr<T>::insert_edge(uint32_t u, uint32_t v)
 {
     // store (u, v) as out edge
@@ -333,7 +345,7 @@ uint32_t Graph_csr<T>::bfs_2(uint32_t u)
 }
 
 template <class T>
-uint32_t* Graph_csr<T>::bfs_layers(uint32_t u)
+uint32_t *Graph_csr<T>::bfs_layers(uint32_t u)
 {
     for (uint32_t i = 0; (i < this->n) && (this->layers[i] != 0); i++)
         this->layers[i] = 0;

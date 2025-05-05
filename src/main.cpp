@@ -172,7 +172,7 @@ void testKMV(int k, int runs = 10, bool use_old = 0)
 
 int main(int argc, char const *argv[])
 {
-  std::string usage = "./build/apps/run [explicit|minhash-time|similarity-estim|counter-time|size-estim|compute-exact-sizes|compute-pairs] <dataset> <isDirected> <n_hashes|counter_size>";
+  std::string usage = "./build/apps/run [explicit|minhash-time|similarity-estim|counter-time|size-estim|compute-exact-sizes|compute-pairs|distances|apx-distances] <dataset> <isDirected> <n_hashes|counter_size>";
   if (argc < 2)
   {
     cout << usage << endl;
@@ -233,8 +233,15 @@ int main(int argc, char const *argv[])
   {
     std::string datasetName = argv[2];
     bool isDirected = (bool)atoi(argv[3]);
+    computeDistances(datasetName, isDirected);
+  }
+  else if (experimentType == "apx-distances")
+  {
+    std::string datasetName = argv[2];
+    bool isDirected = (bool)atoi(argv[3]);
     uint16_t counter_size = atoi(argv[4]);
-    computeDistances(datasetName, isDirected, counter_size);
+    int n_run = atoi(argv[5]);
+    computeApxDistances(datasetName, isDirected, counter_size, n_run);
   }
   else
   {

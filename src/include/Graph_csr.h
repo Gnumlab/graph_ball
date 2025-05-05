@@ -117,6 +117,20 @@ public:
     void setM(uint64_t m);
 
     /**
+     * This method returns the current out-degree of the given vertex `u`.
+     * @param u: the given vertex
+     * @return: the current out-degree of the vertex.
+     */
+    uint32_t get_out_degree(uint32_t const u) const;
+
+    /**
+     * This method returns the current in-degree of the given vertex `u`.
+     * @param u: the given vertex
+     * @return: the current in-degree of the vertex.
+     */
+    uint32_t get_in_degree(uint32_t const u) const;
+
+    /**
      * This method sets the threshold value for the red degree of each vertex in the graph.
      * The threshold value is used to determine when to propagate the red edges.
      * @see propagate
@@ -124,11 +138,13 @@ public:
      */
     void setThreshold(float phi);
 
+    /**
+     * This method sets the parameter k of the LazyAlg.
+     * The parameter `k` is the number of random samples after each edge insertion.
+     * @see propagate
+     * @param k: number of random sample after each edge insertion.
+     */
     void setK(int k);
-
-    void setHashes(Hash<uint32_t> **hash_functions);
-
-    void setHash(TabulationHash<uint32_t> *hash);
 
     /**
      * This method inserts the edge (u, v) into the graph.

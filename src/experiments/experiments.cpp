@@ -405,7 +405,7 @@ void similarityEstimationExperiment(string datasetName, bool isDirected, vector<
     delete G;
 }
 
-void computeDistances(std::string datasetName, bool isDirected, uint16_t counter_size, float phi = 0.25, int k = 2)
+void computeDistances(std::string datasetName, bool isDirected)
 {
     std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
 
@@ -415,37 +415,31 @@ void computeDistances(std::string datasetName, bool isDirected, uint16_t counter
     uint64_t m;
 
     uint32_t *edges = read_edges(fileName, &n, &m);
-    permute_edges(edges, 2 * m);
+    // permute_edges(edges, 2 * m);
 
     TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
-    Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_file(fileName, isDirected, k, phi, counter_size, hash);
+    Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_edges(edges, n, m, isDirected, 0, 0.0, 0, hash);
 
     uint64_t i = 0;
     for (float alpha : timeStamps)
     {
         for (; i < 2 * m * alpha; i += 2)
-            G->update(edges[i], edges[i + 1]);
+            G->insert_edge(edges[i], edges[i + 1]);
 
         std::string outputFileName = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.dist";
-        // std::string apx_layers = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%_apx.dist";
         std::ofstream file(outputFileName, ios::out);
 
         for (uint32_t u = 0; u < n; u++)
         {
-            cerr << "\r" << alpha * 100 << "%\t" << 100 * u / n << "%";
-            uint32_t h1size = G->balls[u].ball1->size();
-            uint32_t h2size = G->balls[u].ball2->size();
-            // printf("%u %u %u", u, h1size, h2size);
-            file << u << " " << h1size << " " << h2size;
+            cerr << "\ralpha=" << alpha * 100 << "%\t" << 100 * u / n << "%";
+            file << u;
 
             uint32_t *layers = G->bfs_layers(u);
             uint32_t h = 1;
             while (layers[h] != 0)
             {
-                // printf(" %u", layers[h++]);
                 file << " " << layers[h++];
             }
-            // printf("\n");
             file << endl;
         }
 
@@ -457,4 +451,75 @@ void computeDistances(std::string datasetName, bool isDirected, uint16_t counter
     delete hash;
     delete[] edges;
     delete G;
+}
+
+void computeApxDistances(std::string datasetName, bool isDirected, uint16_t counter_size, int n_run = 1, float phi = 0.25, int k = 2)
+{
+    std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+    string fileName = "dataset/data/" + datasetName + ".edges";
+    uint32_t n;
+    uint64_t m;
+    uint32_t *edges = read_edges(fileName, &n, &m);
+
+    pair<double, double> **sizes = new pair<double, double> *[n];
+
+    // non mi fido, e quindi inizializzo tutto a zero
+    for (uint32_t u = 0; u < n; u++)
+    {
+        sizes[u] = new pair<double, double>[timeStamps.size()];
+        for (uint32_t j = 0; j < timeStamps.size(); j++)
+        {
+            sizes[u][j] = {0.0, 0.0};
+        }
+    }
+
+    for (int r = 0; r < n_run; r++)
+    {
+        // permute_edges(edges, 2 * m);
+        TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
+        Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_edges(edges, n, m, isDirected, k, phi, counter_size, hash);
+
+        uint64_t i = 0;
+        for (uint32_t j = 0; j < timeStamps.size(); j++)
+        {
+            float alpha = timeStamps[j];
+
+            for (; i < 2 * m * alpha; i += 2)
+                G->update(edges[i], edges[i + 1]);
+
+            for (uint32_t u = 0; u < n; u++)
+            {
+                cerr << "\rRun=" << r << ", alpha=" << alpha * 100 << "%\t" << 100 * u / n << "%";
+                uint32_t h1size = G->balls[u].ball1->size();
+                uint32_t h2size = G->balls[u].ball2->size();
+                uint32_t deg = G->get_out_degree(u);
+
+                sizes[u][j].first += deg < counter_size ? deg : h1size;
+                sizes[u][j].second += deg == 0 ? 0 : h2size;
+            }
+        }
+
+        cerr << endl;
+
+        delete hash;
+        delete G;
+    }
+
+    for (uint32_t j = 0; j < timeStamps.size(); j++)
+    {
+        float alpha = timeStamps[j];
+        std::string outputFileName = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.apxdist";
+        std::ofstream file(outputFileName, ios::out);
+
+        for (uint32_t u = 0; u < n; u++)
+        {
+            file << u << " " << sizes[u][j].first / n_run << " " << sizes[u][j].second / n_run << endl;
+        }
+        file.close();
+    }
+
+    for (uint32_t u = 0; u < n; u++)
+        delete[] sizes[u];
+    delete[] sizes;
+    delete[] edges;
 }
