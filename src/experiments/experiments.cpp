@@ -453,7 +453,7 @@ void computeDistances(std::string datasetName, bool isDirected)
     delete G;
 }
 
-void computeApxDistances(std::string datasetName, bool isDirected, uint16_t counter_size, int n_run = 1, float phi = 0.25, int k = 2)
+void computeApxDistances(std::string datasetName, bool isDirected, uint16_t counter_size, int n_run = 10, float phi = 0.25, int k = 2)
 {
     std::vector<float> timeStamps = {0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
     string fileName = "dataset/data/" + datasetName + ".edges";
@@ -466,55 +466,60 @@ void computeApxDistances(std::string datasetName, bool isDirected, uint16_t coun
     // non mi fido, e quindi inizializzo tutto a zero
     for (uint32_t u = 0; u < n; u++)
     {
-        sizes[u] = new pair<double, double>[timeStamps.size()];
-        for (uint32_t j = 0; j < timeStamps.size(); j++)
+        sizes[u] = new pair<double, double>[n_run];
+        for (int j = 0; j < n_run; j++)
         {
             sizes[u][j] = {0.0, 0.0};
         }
     }
 
-    for (int r = 0; r < n_run; r++)
+    auto hashes = new TabulationHash<uint32_t> *[n_run];
+    auto graphs = new Graph_csr<KMVBall<uint32_t>> *[n_run];
+    for (int j = 0; j < n_run; j++)
     {
-        // permute_edges(edges, 2 * m);
-        TabulationHash<uint32_t> *hash = new TabulationHash<uint32_t>();
-        Graph_csr<KMVBall<uint32_t>> *G = Graph_csr<KMVBall<uint32_t>>::from_edges(edges, n, m, isDirected, k, phi, counter_size, hash);
+        hashes[j] = new TabulationHash<uint32_t>();
+        graphs[j] = Graph_csr<KMVBall<uint32_t>>::from_edges(edges, n, m, isDirected, k, phi, counter_size, hashes[j]);
+    }
 
-        uint64_t i = 0;
-        for (uint32_t j = 0; j < timeStamps.size(); j++)
+    uint64_t i = 0;
+    for (float alpha : timeStamps)
+    {
+        for (; i < 2 * m * alpha; i += 2)
         {
-            float alpha = timeStamps[j];
+            for (int j = 0; j < n_run; j++)
+                graphs[j]->update(edges[i], edges[i + 1]);
+        }
 
-            for (; i < 2 * m * alpha; i += 2)
-                G->update(edges[i], edges[i + 1]);
+        for (uint32_t u = 0; u < n; u++)
+        {
+            cerr << "\ralpha=" << alpha * 100 << "%\t" << 100 * u / n << "%";
 
-            for (uint32_t u = 0; u < n; u++)
+            for (int j = 0; j < n_run; j++)
             {
-                cerr << "\rRun=" << r << ", alpha=" << alpha * 100 << "%\t" << 100 * u / n << "%";
+                auto G = graphs[j];
                 uint32_t h1size = G->balls[u].ball1->size();
                 uint32_t h2size = G->balls[u].ball2->size();
                 uint32_t deg = G->get_out_degree(u);
 
-                sizes[u][j].first += deg < counter_size ? deg : h1size;
-                sizes[u][j].second += deg == 0 ? 0 : h2size;
+                sizes[u][j].first = deg < counter_size ? deg : h1size;
+                sizes[u][j].second = deg == 0 ? 0 : h2size;
             }
         }
 
         cerr << endl;
 
-        delete hash;
-        delete G;
-    }
-
-    for (uint32_t j = 0; j < timeStamps.size(); j++)
-    {
-        float alpha = timeStamps[j];
         std::string outputFileName = "results/distances/" + datasetName + "_" + std::to_string(static_cast<int>(alpha * 100)) + "\%.apxdist";
         std::ofstream file(outputFileName, ios::out);
 
         for (uint32_t u = 0; u < n; u++)
         {
-            file << u << " " << sizes[u][j].first / n_run << " " << sizes[u][j].second / n_run << endl;
+            for (int j = 0; j < n_run; j++)
+            {
+                file << sizes[u][j].first << " " << sizes[u][j].second << " ";
+            }
+            file << endl;
         }
+
         file.close();
     }
 
@@ -522,4 +527,12 @@ void computeApxDistances(std::string datasetName, bool isDirected, uint16_t coun
         delete[] sizes[u];
     delete[] sizes;
     delete[] edges;
+
+    for (int j = 0; j < n_run; j++)
+    {
+        delete hashes[j];
+        delete graphs[j];
+    }
+    delete[] hashes;
+    delete[] graphs;
 }
